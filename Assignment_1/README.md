@@ -1,0 +1,1 @@
+The assignment project after getting step 5 and 6 to work is a simple Rock-Paper-Scissors (RPS) game built using Jac Language. It demonstrates how to build an interactive game where a user plays against the computer, and an AI commentary system provides hints or explanations about the result of each round using byllm.
