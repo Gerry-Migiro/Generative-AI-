@@ -9,3 +9,6 @@ src/
 # Session files
 *.session
 *.session.users.json
+
+# Session files
+.env
