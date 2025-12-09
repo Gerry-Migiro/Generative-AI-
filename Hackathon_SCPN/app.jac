@@ -1,6 +1,7 @@
 # Backend Code
 import from byllm.lib { Model }
 import from json { loads, dumps }
+import from urllib.request { urlopen, Request }
 
 glob llm = Model(model_name="gemini/gemini-2.0-flash", verbose=False);
 
@@ -75,16 +76,13 @@ def suggest_jobs(profile_skills: list, profile_interests: list, profile_goals: l
 """Extract technical skills from resume text. Return only concrete tools, languages, frameworks, and technologies as nouns. Skip job titles, company names, soft skills, general and unecessary descriptions.""" 
 def resume_parser(resume_text: str) -> list[str] by llm(method="Reason");
 
-# Agent 6: External Job Fetcher - Simulates fetching job postings from external APIs
-def external_job_fetcher(keywords: str, location: str, limit: int) -> dict by llm(method="Reason", context="Generate realistic job postings matching the keywords and location. Return JSON with 'jobs' array containing title, company, location, description, posted_date, url fields.");
-
 # --- Walkers ---
 
 walker seed_database {
     can seed with `root entry {
-        # Check if already seeded
-        let existing_roles = [here -->](`?Role);
-        if len(existing_roles) > 0 {
+        # Check if already seeded by looking for jobs
+        let existing_jobs = [here -->](`?JobPosting);
+        if len(existing_jobs) > 0 {
             print("Database already seeded");
             return;
         }
@@ -99,11 +97,64 @@ walker seed_database {
         here ++> Role(title="UX Designer", salary_range="$70k - $130k", description="Designs user experiences");
 
         # Create Courses
-        here ++> Course(title="Python Programming Masterclass", url="https://udemy.com/python", duration="40 hours");
-        here ++> Course(title="Data Science Bootcamp", url="https://coursera.org/data-science", duration="3 months");
-        here ++> Course(title="Web Development Complete", url="https://udemy.com/web-dev", duration="60 hours");
-        here ++> Course(title="Machine Learning Specialization", url="https://coursera.org/ml", duration="4 months");
-        here ++> Course(title="AWS Cloud Practitioner", url="https://aws.amazon.com/training", duration="20 hours");
+        let py_course = here ++> Course(title="Python Programming Masterclass", url="https://udemy.com/python", duration="40 hours");
+        let ds_course = here ++> Course(title="Data Science Bootcamp", url="https://coursera.org/data-science", duration="3 months");
+        let web_course = here ++> Course(title="Web Development Complete", url="https://udemy.com/web-dev", duration="60 hours");
+        let ml_course = here ++> Course(title="Machine Learning Specialization", url="https://coursera.org/ml", duration="4 months");
+        let aws_course = here ++> Course(title="AWS Cloud Practitioner", url="https://aws.amazon.com/training", duration="20 hours");
+        let react_course = here ++> Course(title="React Advanced Patterns", url="https://frontendmasters.com/react", duration="25 hours");
+        let sql_course = here ++> Course(title="SQL for Data Analysis", url="https://udacity.com/sql", duration="30 hours");
+        let product_course = here ++> Course(title="Product Management Fundamentals", url="https://coursera.org/product-management", duration="6 weeks");
+        let devops_course = here ++> Course(title="DevOps Engineering Bootcamp", url="https://udemy.com/devops", duration="50 hours");
+        let ux_course = here ++> Course(title="UX Design Principles", url="https://interaction-design.org/ux", duration="8 weeks");
+
+        # Create Skills
+        let python_skill = here ++> Skill(name="Python");
+        let js_skill = here ++> Skill(name="JavaScript");
+        let react_skill = here ++> Skill(name="React");
+        let ml_skill = here ++> Skill(name="Machine Learning");
+        let aws_skill = here ++> Skill(name="AWS");
+        let pandas_skill = here ++> Skill(name="Pandas");
+        let sql_skill = here ++> Skill(name="SQL");
+        let docker_skill = here ++> Skill(name="Docker");
+        let figma_skill = here ++> Skill(name="Figma");
+        let agile_skill = here ++> Skill(name="Agile");
+
+        # Link Courses to Skills (Teaches edge)
+        py_course ++> python_skill;
+        ds_course ++> python_skill;
+        ds_course ++> pandas_skill;
+        ds_course ++> sql_skill;
+        ds_course ++> ml_skill;
+        web_course ++> js_skill;
+        web_course ++> react_skill;
+        ml_course ++> python_skill;
+        ml_course ++> ml_skill;
+        aws_course ++> aws_skill;
+        react_course ++> react_skill;
+        react_course ++> js_skill;
+        sql_course ++> sql_skill;
+        product_course ++> agile_skill;
+        devops_course ++> docker_skill;
+        devops_course ++> aws_skill;
+        ux_course ++> figma_skill;
+
+        # Create Job Postings
+        here ++> JobPosting(title="Software Developer", company="TechCorp Inc.", posted_date="2024-12-01");
+        here ++> JobPosting(title="Senior Software Engineer", company="Google", posted_date="2024-12-05");
+        here ++> JobPosting(title="Full Stack Developer", company="Microsoft", posted_date="2024-12-03");
+        here ++> JobPosting(title="Data Scientist", company="Amazon", posted_date="2024-12-02");
+        here ++> JobPosting(title="ML Engineer", company="Meta", posted_date="2024-12-06");
+        here ++> JobPosting(title="Product Manager", company="Apple", posted_date="2024-12-04");
+        here ++> JobPosting(title="Senior Product Manager", company="Netflix", posted_date="2024-12-07");
+        here ++> JobPosting(title="DevOps Engineer", company="Spotify", posted_date="2024-12-01");
+        here ++> JobPosting(title="Cloud Engineer", company="IBM", posted_date="2024-12-05");
+        here ++> JobPosting(title="UX Designer", company="Adobe", posted_date="2024-12-03");
+        here ++> JobPosting(title="Senior UX/UI Designer", company="Figma", posted_date="2024-12-06");
+        here ++> JobPosting(title="Backend Developer", company="Stripe", posted_date="2024-12-02");
+        here ++> JobPosting(title="Frontend Developer", company="Airbnb", posted_date="2024-12-04");
+        here ++> JobPosting(title="Data Analyst", company="Salesforce", posted_date="2024-12-07");
+        here ++> JobPosting(title="Python Developer", company="Dropbox", posted_date="2024-12-01");
 
         print("Database seeded successfully");
     }
@@ -126,12 +177,13 @@ walker get_all_roles {
     }
 }
 
-walker get_all_courses {
-    can return_courses with `root entry {
-        let courses = [here -->](`?Course);
+walker get_recommended_courses {
+    can recommend with `root entry {
+        # Get all courses and return them
+        let all_courses = [-->](`?Course);
         let course_list = [];
-        for c in courses {
-            course_list.append({"title": c.title, "url": c.url, "duration": c.duration});
+        for course in all_courses {
+            course_list.append({"title": course.title, "url": course.url, "duration": course.duration});
         }
         report course_list;
     }
@@ -179,68 +231,6 @@ walker parse_resume {
             "added_skills": added_skills,
             "skipped_skills": skipped_skills,
             "total_skills": len(current_skills) + len(added_skills)
-        };
-    }
-}
-
-# External Job Fetching Walker: Fetches real job postings from external APIs
-walker fetch_external_jobs {
-    has keywords: str;
-    has location: str = "remote";
-    has limit: int = 10;
-    
-    can fetch_jobs with `root entry {
-        # Use AI agent to simulate job API fetching
-        let job_results = external_job_fetcher(
-            keywords=keywords,
-            location=location,
-            limit=limit
-        );
-        
-        # Store job postings in graph
-        for job_data in job_results["jobs"] {
-            let job_node = JobPosting(
-                title=job_data["title"],
-                company=job_data["company"],
-                location=job_data["location"],
-                description=job_data["description"],
-                posted_date=job_data["posted_date"],
-                url=job_data["url"]
-            );
-            here ++> job_node;
-        }
-        
-        report {"jobs_fetched": job_results["jobs"].length, "jobs": job_results["jobs"]};
-    }
-}
-
-# OSP Skill Matching Walker: Calculate similarity between user skills and target role
-walker calculate_skill_match {
-    has target_skills: list;
-    has match_score: float = 0.0;
-    
-    can match with User entry {
-        let user_skills = [];
-        for s in [here ->:UserSkill:->] {
-            user_skills.append(s.name);
-        }
-        
-        # Jaccard similarity: intersection / union
-        let user_set = set(user_skills);
-        let target_set = set(self.target_skills);
-        let intersection = user_set.intersection(target_set);
-        let union = user_set.union(target_set);
-        
-        if len(union) > 0 {
-            self.match_score = (len(intersection) / len(union)) * 100;
-        }
-        
-        report {
-            "match_percentage": self.match_score,
-            "user_skills": user_skills,
-            "target_skills": self.target_skills,
-            "matched_skills": list(intersection),
-            "missing_skills": list(target_set.difference(user_set))
         };
     }
 }
@@ -397,8 +387,8 @@ walker generate_roadmap {
             if "gaps" in strategy_obj {
                 gaps_list = strategy_obj["gaps"];
             }
-        } except ex {
-            print("Could not extract gaps from strategy: " + str(ex));
+        } except Exception {
+            print("Could not extract gaps from strategy");
             print("Strategy content: " + strategy);
         }
         
@@ -435,38 +425,73 @@ walker generate_roadmap {
 
 walker fetch_jobs {
     has role_filter: str = "";
-    can start with `root entry {
-        visit [-->](`?User);
-    }
-    can fetch with User entry {
-        let user_skills = [];
-        for s in [here ->:UserSkill:->] {
-            user_skills.append(s.name);
-        }
-        
-        # Call AI Agent
-        let jobs_json = suggest_jobs(
-            profile_skills=user_skills, 
-            profile_interests=here.interests, 
-            profile_goals=here.goals,
-            role_filter=self.role_filter,
-            context="Return ONLY a valid JSON list of objects. No Markdown. No code blocks. Structure: [ { 'title': '', 'company': '', 'match_score': 0-100 } ]"
-        );
+    can fetch with `root entry {
+        let jobs_list = [];
         
         try {
-            # Clean up potential markdown code blocks from LLM response
-            let clean_json = jobs_json.replace("```json", "").replace("```", "").strip();
-            let jobs = loads(clean_json);
+            # Fetch from Remotive API (Software Development category)
+            # Increased limit to 50 to get more variety
+            let url = "https://remotive.com/api/remote-jobs?category=software-dev&limit=50";
             
-            # Save to user node for persistence
-            here.last_jobs = jobs_json;
-            here.jobs_role_filter = self.role_filter;
+            let request = Request(url);
+            request.add_header("User-Agent", "Mozilla/5.0 (Career-Advisory-App)");
+            let response = urlopen(request);
+            let data = response.read().decode("utf-8");
+            let json_data = loads(data);
             
-            report jobs;
-        } except ex {
-            # Fallback
-            report [{"title": "Could not load smart suggestions", "company": "System", "posted": "Now"}];
-            print("Error parsing jobs: " + str(ex));
+            if "jobs" in json_data {
+                for job in json_data["jobs"] {
+                    if len(jobs_list) >= 50 {
+                        break;
+                    }
+                    
+                    let job_title = job["title"];
+                    
+                    # Simple filter if user specified a role
+                    if self.role_filter != "" {
+                        let filter_lower = self.role_filter.lower();
+                        let title_lower = job_title.lower();
+                        if filter_lower not in title_lower {
+                            continue;
+                        }
+                    }
+                    
+                    jobs_list.append({
+                        "title": job_title,
+                        "company": job["company_name"],
+                        "location": job["candidate_required_location"],
+                        "posted_date": job["publication_date"][:10],
+                        "match_score": 85
+                    });
+                }
+            }
+            
+        } except Exception as e {
+            print(f"Error fetching jobs: {e}");
+        }
+
+        # Fallback to seeded jobs if API fails OR returns no results
+        if len(jobs_list) == 0 {
+            print("No jobs from API, using seeded data");
+            let all_jobs = [root -->](`?JobPosting);
+            for job in all_jobs {
+                if self.role_filter == "" or self.role_filter.lower() in job.title.lower() {
+                    jobs_list.append({
+                        "title": job.title,
+                        "company": job.company,
+                        "location": "Remote",
+                        "posted_date": job.posted_date,
+                        "match_score": 75
+                    });
+                }
+            }
+        }
+        
+        # Return jobs or empty list
+        if len(jobs_list) > 0 {
+            report jobs_list;
+        } else {
+            report [{"title": "No jobs found", "company": "Try a different search", "posted_date": "N/A", "match_score": 0}];
         }
     }
 }
@@ -486,6 +511,7 @@ cl import from .frontend.pages.Dashboard { Dashboard }
 cl import from .frontend.pages.CareerPath { CareerPath }
 cl import from .frontend.pages.Jobs { Jobs }
 cl import from .frontend.pages.Profile { Profile }
+cl import from .frontend.pages.Courses { Courses }
 
 cl def app() -> any {
     return <Router>
@@ -498,6 +524,7 @@ cl def app() -> any {
                 <Route path="/career" element={<CareerPath />} />
                 <Route path="/jobs" element={<Jobs />} />
                 <Route path="/profile" element={<Profile />} />
+                <Route path="/courses" element={<Courses />} />
             </Routes>
         </div>
     </Router>;

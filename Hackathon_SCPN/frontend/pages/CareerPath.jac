@@ -218,7 +218,6 @@ cl def CareerPath() -> any {
     }
 
     async def processResponse(report: any) -> None {
-        console.log("Processing report:", report);
         let newRoadmap = {};
         
         newRoadmap["target_role"] = report["target_role"];
@@ -249,7 +248,6 @@ cl def CareerPath() -> any {
             newRoadmap["gaps"] = extractData(report["gaps"]);
         }
 
-        console.log("Processed roadmap:", newRoadmap);
         setRoadmap(newRoadmap);
     }
 
@@ -260,9 +258,7 @@ cl def CareerPath() -> any {
         setRoadmap(None);
         
         try {
-            console.log("Sending request for role:", role);
             let res = await root spawn generate_roadmap(target_role=role);
-            console.log("Received response:", res);
 
             if res.reports and res.reports.length > 0 {
                 await processResponse(res.reports[0]);
@@ -299,16 +295,10 @@ cl def CareerPath() -> any {
 
             # Scroll to learning plan if requested
             if location.state and location.state["scrollTo"] == "learningPlan" {
-                console.log("Scroll requested to learningPlan");
                 setTimeout(lambda -> None {
-                    console.log("Attempting to scroll to learningPlan");
                     let element = document.getElementById("learningplan");
-                    console.log("Element found:", element);
                     if element {
                         element.scrollIntoView({"behavior": "smooth", "block": "start"});
-                        console.log("Scrolled to learningplan");
-                    } else {
-                        console.log("learningplan element not found");
                     }
                 }, 1000);
             }

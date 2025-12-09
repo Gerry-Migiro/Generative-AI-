@@ -1,7 +1,7 @@
 cl import from react { useState, useEffect }
 cl import from "@jac-client/utils" { jacIsLoggedIn, Navigate }
 
-walker get_all_courses {}
+walker get_recommended_courses {}
 
 cl def Courses() -> any {
     if not jacIsLoggedIn() {
@@ -12,12 +12,12 @@ cl def Courses() -> any {
     let [loading, setLoading] = useState(True);
     let [filterText, setFilterText] = useState("");
     
-    # Load courses on mount
+    # Load personalized courses on mount
     useEffect(lambda -> None {
         async def loadCourses() -> None {
             setLoading(True);
             try {
-                let res = await root spawn get_all_courses();
+                let res = await root spawn get_recommended_courses();
                 if res.reports and res.reports.length > 0 {
                     setCourses(res.reports[0]);
                 }
@@ -45,9 +45,9 @@ cl def Courses() -> any {
     let filteredCourses = getFilteredCourses();
     
     return <div style={{"maxWidth": "1200px", "margin": "0 auto", "padding": "0 1rem"}}>
-        <h2>📚 Learning Resources</h2>
+        <h2>📚 Recommended Learning Resources</h2>
         <p style={{"color": "#6b7280", "marginBottom": "1.5rem"}}>
-            Curated courses to help you build skills for your career goals.
+            Personalized courses based on your skill gaps and career goals.
         </p>
         
         <div style={{"marginBottom": "2rem"}}>

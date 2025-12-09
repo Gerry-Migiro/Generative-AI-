@@ -47,6 +47,12 @@ cl def Navbar()  -> any {
             >
                 Profile
             </Link>
+            <Link
+                to="/courses"
+                style={{"color": "white", "textDecoration": "none"}}
+            >
+                Courses
+            </Link>
             <button
                 onClick={handleLogout}
                 style={{

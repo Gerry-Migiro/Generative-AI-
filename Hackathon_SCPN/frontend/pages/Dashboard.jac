@@ -14,12 +14,9 @@ cl def Dashboard()  -> any {
 
     async def loadData()  -> None {
         try {
-            console.log("Loading dashboard data...");
             res = await root spawn get_profile();
-            console.log("Get profile result:", res);
             if res.reports {
                 let p = res.reports[0];
-                console.log("Profile data:", p);
                 if p and not p["error"] {
                     setProfile(p);
                     # Redirect to profile if name is empty
@@ -32,16 +29,12 @@ cl def Dashboard()  -> any {
                     if p["last_strategy"] and p["last_strategy"] != "[]" {
                         try {
                             let clean_strategy = p["last_strategy"].replace("```json", "").replace("```", "").trim();
-                            console.log("Clean strategy:", clean_strategy);
                             let strategy = JSON.parse(clean_strategy);
-                            console.log("Parsed strategy:", strategy);
                             if strategy.gaps && Array.isArray(strategy.gaps) {
-                                console.log("Setting gaps:", strategy.gaps);
                                 setGaps(strategy.gaps);
                             }
                         } except ex1 {
                             console.error("Error parsing strategy:", ex1);
-                            console.log("Strategy value:", p["last_strategy"]);
                         }
                     }
                     
@@ -49,16 +42,12 @@ cl def Dashboard()  -> any {
                     if p["last_roadmap_plan"] and p["last_roadmap_plan"] != "[]" {
                         try {
                             let clean_plan = p["last_roadmap_plan"].replace("```json", "").replace("```", "").trim();
-                            console.log("Clean plan:", clean_plan);
                             let plan = JSON.parse(clean_plan);
-                            console.log("Parsed plan:", plan);
                             if plan.weeks {
-                                console.log("Setting roadmap weeks:", plan.weeks);
                                 setRoadmap(plan.weeks);
                             }
                         } except ex2 {
                             console.error("Error parsing plan:", ex2);
-                            console.log("Plan value:", p["last_roadmap_plan"]);
                         }
                     }
                 } else {
@@ -184,7 +173,7 @@ cl def Dashboard()  -> any {
                         "textDecoration": "none"
                     }}
                 >
-                    Set a goal &rarr;
+                    Set a goal →
                 </Link>}
             </div>
             <div
