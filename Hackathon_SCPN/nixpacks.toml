@@ -1,9 +1,10 @@
 [phases.setup]
-nixPkgs = ['python310', 'nodejs-18_x']
+nixPkgs = ['python310', 'nodejs-18_x', 'pip']
 
 [phases.install]
 cmds = [
-    'pip install jaclang',
+    'python3 -m pip install --upgrade pip',
+    'python3 -m pip install jaclang',
     'npm install'
 ]
 
