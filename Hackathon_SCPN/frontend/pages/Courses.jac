@@ -8,16 +8,16 @@ cl def Courses()  -> any {
         return <Navigate to="/login" />;
     }
 
-    let [courses, setCourses] = useState([]);
-    let [loading, setLoading] = useState(True);
-    let [filterText, setFilterText] = useState("");
+    [courses, setCourses] = useState([]);
+    [loading, setLoading] = useState(True);
+    [filterText, setFilterText] = useState("");
 
     # Load personalized courses on mount
     useEffect(
         lambda   -> None{ async def loadCourses()  -> None {
             setLoading(True);
             try {
-                let res = await root spawn get_recommended_courses();
+                res = await root spawn get_recommended_courses();
                 if res.reports and res.reports.length > 0 {
                     setCourses(res.reports[0]);
                 }
@@ -35,13 +35,13 @@ cl def Courses()  -> any {
             return courses;
         }
 
-        let lower = filterText.toLowerCase();
+        lower = filterText.toLowerCase();
         return courses.filter(
             lambda  c: any  -> bool{ return c["title"].toLowerCase().includes(lower); }
         );
     }
 
-    let filteredCourses = getFilteredCourses();
+    filteredCourses = getFilteredCourses();
 
     return <div
         className="container"

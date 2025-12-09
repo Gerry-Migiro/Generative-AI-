@@ -12,10 +12,10 @@ cl def Jobs()  -> any {
         return <Navigate to="/login" />;
     }
 
-    let [jobs, setJobs] = useState([]);
-    let [roleFilter, setRoleFilter] = useState("");
-    let [loading, setLoading] = useState(False);
-    let [initialized, setInitialized] = useState(False);
+    [jobs, setJobs] = useState([]);
+    [roleFilter, setRoleFilter] = useState("");
+    [loading, setLoading] = useState(False);
+    [initialized, setInitialized] = useState(False);
 
     # Clean and parse job data from backend
     def processJobs(jobsData: any) -> None {
@@ -28,8 +28,8 @@ cl def Jobs()  -> any {
             # Handle string (needs parsing) or already parsed array
             # Check if it has replace method (string)
             if jobsData.replace {
-                let clean = jobsData.replace("```json", "").replace("```", "").trim();
-                let parsed = JSON.parse(clean);
+                clean = jobsData.replace("```json", "").replace("```", "").trim();
+                parsed = JSON.parse(clean);
                 setJobs(parsed);
             } else {
                 setJobs(jobsData);
@@ -50,7 +50,7 @@ cl def Jobs()  -> any {
         setJobs([]);
 
         try {
-            let res = await root spawn fetch_jobs(role_filter=role);
+            res = await root spawn fetch_jobs(role_filter=role);
 
             if res.reports and res.reports.length > 0 {
                 processJobs(res.reports[0]);
@@ -76,15 +76,15 @@ cl def Jobs()  -> any {
         lambda   -> None{ if not initialized {
             async def init()  -> None {
                 try {
-                    let res = await root spawn get_profile();
+                    res = await root spawn get_profile();
 
                     if not (res.reports and res.reports.length > 0) {
                         setInitialized(True);
                         return;
                     }
 
-                    let profile = res.reports[0];
-                    let targetRole = profile["target_role"] or "";
+                    profile = res.reports[0];
+                    targetRole = profile["target_role"] or "";
 
                     # Pre-fill role filter with target role and auto-search
                     setRoleFilter(targetRole);
