@@ -3,9 +3,8 @@ nixPkgs = ['python310Full', 'nodejs-18_x']
 
 [phases.install]
 cmds = [
-    'python3 -m ensurepip --upgrade',
-    'python3 -m pip install --upgrade pip',
-    'python3 -m pip install jaclang',
+    'python3 -m venv .venv',
+    '.venv/bin/pip install jaclang byllm',
     'npm install'
 ]
 
@@ -13,4 +12,4 @@ cmds = [
 cmds = ['npm run build']
 
 [start]
-cmd = 'jac serve app.jac --host 0.0.0.0 --port $PORT'
+cmd = '.venv/bin/jac serve app.jac --host 0.0.0.0 --port $PORT'
