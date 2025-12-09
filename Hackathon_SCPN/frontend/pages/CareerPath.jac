@@ -55,7 +55,7 @@ cl def CareerPath() -> any {
                         {content.strengths.map(lambda item: str, i: int -> any {
                             return <div key={i} style={{"display": "flex", "gap": "0.5rem", "alignItems": "flex-start"}}>
                                 <span style={{"color": "#059669", "fontWeight": "bold"}}>●</span>
-                                <span style={{"color": "#374151", "lineHeight": "1.6"}}>{item}</span>
+                                <span style={{"color": "var(--card-foreground)", "lineHeight": "1.6"}}>{item}</span>
                             </div>;
                         })}
                     </div>
@@ -66,14 +66,14 @@ cl def CareerPath() -> any {
                         {content.gaps.map(lambda item: str, i: int -> any {
                             return <div key={i} style={{"display": "flex", "gap": "0.5rem", "alignItems": "flex-start"}}>
                                 <span style={{"color": "#dc2626", "fontWeight": "bold"}}>●</span>
-                                <span style={{"color": "#374151", "lineHeight": "1.6"}}>{item}</span>
+                                <span style={{"color": "var(--card-foreground)", "lineHeight": "1.6"}}>{item}</span>
                             </div>;
                         })}
                     </div>
                 </div>}
                 {content.recommendation and <div>
                     <h4 style={{"fontSize": "1.1rem", "fontWeight": "bold", "marginBottom": "0.75rem", "color": "#2563eb"}}>→ Recommendation</h4>
-                    <p style={{"color": "#374151", "lineHeight": "1.6", "paddingLeft": "0.5rem"}}>{content.recommendation}</p>
+                    <p style={{"color": "var(--card-foreground)", "lineHeight": "1.6", "paddingLeft": "0.5rem"}}>{content.recommendation}</p>
                 </div>}
             </div>;
         }
@@ -89,11 +89,11 @@ cl def CareerPath() -> any {
             
             return <div style={{"display": "flex", "flexDirection": "column", "gap": "1.5rem"}}>
                 {content.demand and <div>
-                    <span style={{"fontWeight": "bold", "color": "#1f2937"}}>Market Demand: </span>
+                    <span style={{"fontWeight": "bold", "color": "var(--foreground)"}}>Market Demand: </span>
                     <span style={{"color": demandColor, "fontWeight": "600", "fontSize": "1.1rem"}}>{content.demand}</span>
                 </div>}
                 {content.salary_range and <div>
-                    <span style={{"fontWeight": "bold", "color": "#1f2937"}}>Salary Range: </span>
+                    <span style={{"fontWeight": "bold", "color": "var(--foreground)"}}>Salary Range: </span>
                     <span style={{"color": "#059669", "fontWeight": "600", "fontSize": "1.1rem"}}>{content.salary_range}</span>
                 </div>}
                 {content.top_companies and Array.isArray(content.top_companies) and content.top_companies.length > 0 and <div>
@@ -139,10 +139,10 @@ cl def CareerPath() -> any {
                     
                     # Headers
                     if cleanLine.startsWith("### ") {
-                        return <h4 key={i} style={{"fontSize": "1.1rem", "fontWeight": "bold", "marginTop": "1rem", "color": "#374151"}}>{cleanLine.substring(4)}</h4>;
+                        return <h4 key={i} style={{"fontSize": "1.1rem", "fontWeight": "bold", "marginTop": "1rem", "color": "var(--foreground)"}}>{cleanLine.substring(4)}</h4>;
                     }
                     if cleanLine.startsWith("## ") {
-                        return <h3 key={i} style={{"fontSize": "1.2rem", "fontWeight": "bold", "marginTop": "1.2rem", "color": "#1f2937"}}>{cleanLine.substring(3)}</h3>;
+                        return <h3 key={i} style={{"fontSize": "1.2rem", "fontWeight": "bold", "marginTop": "1.2rem", "color": "var(--foreground)"}}>{cleanLine.substring(3)}</h3>;
                     }
 
                     # List items
@@ -151,10 +151,10 @@ cl def CareerPath() -> any {
                         let parts = text.split("**");
                         return <div key={i} style={{"display": "flex", "gap": "0.5rem", "alignItems": "flex-start", "paddingLeft": "0.5rem"}}>
                             <span style={{"color": "#3b82f6", "marginTop": "0.4rem", "fontSize": "0.8rem"}}>●</span>
-                            <span style={{"lineHeight": "1.6", "color": "#4b5563"}}>
+                            <span style={{"lineHeight": "1.6", "color": "var(--card-foreground)"}}>
                                 {parts.map(lambda p: str, j: int -> any {
                                     if j % 2 == 1 {
-                                        return <strong key={j} style={{"color": "#1f2937"}}>{p}</strong>;
+                                        return <strong key={j} style={{"color": "var(--foreground)"}}>{p}</strong>;
                                     }
                                     return <span>{p}</span>;
                                 })}
@@ -164,10 +164,10 @@ cl def CareerPath() -> any {
 
                     # Regular paragraphs
                     let parts = cleanLine.split("**");
-                    return <p key={i} style={{"lineHeight": "1.6", "color": "#374151", "margin": "0"}}>
+                    return <p key={i} style={{"lineHeight": "1.6", "color": "var(--card-foreground)", "margin": "0"}}>
                         {parts.map(lambda p: str, j: int -> any {
                             if j % 2 == 1 {
-                                return <strong key={j} style={{"color": "#1f2937"}}>{p}</strong>;
+                                return <strong key={j} style={{"color": "var(--foreground)"}}>{p}</strong>;
                             }
                             return <span>{p}</span>;
                         })}
@@ -211,8 +211,8 @@ cl def CareerPath() -> any {
 
         let sectionId = title.replace(" ", "").toLowerCase();
 
-        return <div id={sectionId} style={{"background": "white", "padding": "2rem", "borderRadius": "12px", "boxShadow": "0 4px 6px -1px rgba(0, 0, 0, 0.1)", "borderTop": "4px solid " + color}}>
-            <h3 style={{"color": color, "fontSize": "1.5rem", "marginBottom": "1.5rem", "paddingBottom": "0.5rem", "borderBottom": "1px solid #f3f4f6"}}>{title}</h3>
+        return <div id={sectionId} className="card" style={{"borderTop": "4px solid " + color, "padding": "2rem"}}>
+            <h3 style={{"color": color, "fontSize": "1.5rem", "marginBottom": "1.5rem", "paddingBottom": "0.5rem", "borderBottom": "1px solid var(--border)"}}>{title}</h3>
             {renderContent(content)}
         </div>;
     }
@@ -242,9 +242,7 @@ cl def CareerPath() -> any {
         newRoadmap["market"] = extractData(report["market"]);
         newRoadmap["plan"] = extractData(report["plan"]);
         
-        if "last_gaps_analysis" in report {
-            newRoadmap["gaps"] = extractData(report["last_gaps_analysis"]);
-        } elif "gaps" in report {
+        if "gaps" in report {
             newRoadmap["gaps"] = extractData(report["gaps"]);
         }
 
@@ -325,10 +323,6 @@ cl def CareerPath() -> any {
                         savedRoadmap["plan"] = p["last_roadmap_plan"]; 
                         hasData = True; 
                     }
-                    if p["last_gaps_analysis"] { 
-                        savedRoadmap["last_gaps_analysis"] = p["last_gaps_analysis"]; 
-                        hasData = True; 
-                    }
 
                     if hasData {
                         await processResponse(savedRoadmap);
@@ -341,10 +335,10 @@ cl def CareerPath() -> any {
         init();
     }, []);
 
-    return <div style={{"maxWidth": "1200px", "margin": "0 auto", "padding": "2rem", "fontFamily": "sans-serif"}}>
-        <h2 style={{"color": "#111827", "marginBottom": "2rem", "fontSize": "2rem", "fontWeight": "700", "textAlign": "center"}}>AI Career Roadmap</h2>
+    return <div className="container" style={{"maxWidth": "1200px", "padding": "2rem 1rem"}}>
+        <h2 className="mb-8" style={{"color": "var(--foreground)", "marginBottom": "2rem", "fontSize": "2rem", "fontWeight": "700", "textAlign": "center"}}>AI Career Roadmap</h2>
         
-        <div style={{"background": "white", "padding": "2rem", "borderRadius": "12px", "boxShadow": "0 4px 6px -1px rgba(0, 0, 0, 0.1)", "marginBottom": "3rem", "maxWidth": "800px", "margin": "0 auto 3rem auto"}}>
+        <div className="card" style={{"marginBottom": "3rem", "maxWidth": "800px", "margin": "0 auto 3rem auto"}}>
             <div style={{"display": "flex", "gap": "1rem", "flexWrap": "wrap"}}>
                 <div style={{"flex": 1}}>
                     <input 
@@ -353,7 +347,7 @@ cl def CareerPath() -> any {
                         placeholder="Enter Target Role (e.g. Senior Python Developer)" 
                         value={role} 
                         onChange={lambda e: any -> None { setRole(e.target.value); }} 
-                        style={{"padding": "1rem", "border": "1px solid #d1d5db", "borderRadius": "8px", "fontSize": "1rem", "width": "100%"}} 
+                        className="form-input"
                     />
                     <datalist id="career-roles-list">
                         {availableRoles.map(lambda r: any, i: int -> any {
@@ -364,34 +358,25 @@ cl def CareerPath() -> any {
                 <button 
                     onClick={generate} 
                     disabled={loading}
-                    style={{
-                        "padding": "1rem 2rem", 
-                        "background": "#2563eb" if not loading else "#93c5fd", 
-                        "color": "white", 
-                        "border": "none", 
-                        "borderRadius": "8px", 
-                        "cursor": "pointer" if not loading else "default",
-                        "fontWeight": "600",
-                        "fontSize": "1rem",
-                        "transition": "background 0.2s"
-                    }}
+                    className="btn btn-primary"
+                    style={{"opacity": "0.7" if loading else "1", "cursor": "default" if loading else "pointer"}}
                 >
                     { "Generating Plan..." if loading else "Generate Roadmap" }
                 </button>
             </div>
-            {error and <div style={{"color": "#dc2626", "marginTop": "1rem", "fontWeight": "500", "textAlign": "center"}}>{error}</div>}
+            {error and <div className="alert-red" style={{"marginTop": "1rem", "textAlign": "center"}}>{error}</div>}
         </div>
 
-        {loading and <div style={{"textAlign": "center", "padding": "4rem", "color": "#6b7280"}}>
-            <div style={{"fontSize": "1.5rem", "marginBottom": "1rem", "fontWeight": "500"}}>Analyzing your profile and market data...</div>
+        {loading and <div style={{"textAlign": "center", "padding": "4rem", "color": "var(--muted-foreground)"}}>
+            <div className="animate-fade-in" style={{"fontSize": "1.5rem", "marginBottom": "1rem", "fontWeight": "500"}}>Analyzing your profile and market data...</div>
             <div style={{"fontSize": "1.1rem"}}>This may take a few seconds.</div>
         </div>}
 
         {not loading and roadmap and <div style={{"display": "grid", "gap": "2rem"}}>
-            {renderSection("Strategic Analysis", roadmap["strategy"], "#1e40af")}
+            {renderSection("Strategic Analysis", roadmap["strategy"], "var(--brand)")}
             {renderSection("Market Insights", roadmap["market"], "#059669")}
             {renderSection("Learning Plan", roadmap["plan"], "#d97706")}
-            {renderSection("Gaps Analysis", roadmap["gaps"], "#dc2626")}
+            {renderSection("Gaps Analysis", roadmap["gaps"], "var(--error)")}
         </div>}
     </div>;
 }

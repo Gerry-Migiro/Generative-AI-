@@ -33,12 +33,14 @@ cl def Profile()  -> any {
     let [loading, setLoading] = useState(False);
     let [resumeText, setResumeText] = useState("");
     let [parseLoading, setParseLoading] = useState(False);
+    let [resumeText, setResumeText] = useState("");
+    let [parseLoading, setParseLoading] = useState(False);
 
     # Load profile on mount
     useEffect(
         lambda   -> None{ async def load()  -> None {
             setLoading(True);
-            
+
             # Fetch available roles
             try {
                 let rolesRes = await root spawn get_all_roles();
@@ -48,7 +50,7 @@ cl def Profile()  -> any {
             } except err {
                 console.error("Error fetching roles:", err);
             }
-            
+
             let res = await root spawn get_profile();
             if res.reports and res.reports.length > 0 {
                 let p = res.reports[0];
@@ -168,27 +170,26 @@ cl def Profile()  -> any {
 
         setParseLoading(True);
         setMessage("Parsing resume...");
-        
+
         try {
             let res = await root spawn parse_resume(resume_text=resumeText);
-            
+
             if res.reports and res.reports.length > 0 {
                 let result = res.reports[0];
-                
                 # Refresh profile to show newly added skills
                 let profileRes = await root spawn get_profile();
                 if profileRes.reports {
                     setProfile(profileRes.reports[0]);
                 }
-                
                 # Show success message with details
                 let added_count = result["added_skills"].length;
                 let skipped_count = result["skipped_skills"].length;
-                
                 setMessage(
-                    f"Resume parsed! Added {added_count} new skills, skipped {skipped_count} existing skills. Total skills: {result['total_skills']}"
+                    f"Resume parsed! Added {added_count} new skills, skipped {skipped_count} existing skills. Total skills: {result[
+                        'total_skills'
+                    ]}"
                 );
-                
+                # Clear resume text
                 # Clear resume text
                 setResumeText("");
             }
@@ -196,7 +197,7 @@ cl def Profile()  -> any {
             console.error("Error parsing resume:", err);
             setMessage("Failed to parse resume. Please try again.");
         }
-        
+
         setParseLoading(False);
         setTimeout(lambda   -> None{ setMessage("");} , 5000);
     }
@@ -210,37 +211,26 @@ cl def Profile()  -> any {
     }
 
     return <div
-        style={{"maxWidth": "800px", "margin": "0 auto", "padding": "2rem 1rem"}}
+        className="container"
+        style={{"maxWidth": "1000px", "padding": "2rem 1rem"}}
     >
-        <h2
-            style={{
-                "fontSize": "1.5rem",
-                "fontWeight": "bold",
-                "marginBottom": "2rem",
-                "color": "#1f2937"
-            }}
-        >
-            Edit Profile
-        </h2>
         <div
-            style={{
-                "background": "white",
-                "padding": "2rem",
-                "borderRadius": "12px",
-                "boxShadow": "0 4px 6px -1px rgba(0, 0, 0, 0.1)"
-            }}
+            className="flex-between"
+            style={{"marginBottom": "2rem"}}
         >
-            <div
-                style={{"marginBottom": "2rem"}}
+            <h1
+                style={{
+                    "fontSize": "2rem",
+                    "fontWeight": "700",
+                    "color": "var(--foreground)"
+                }}
             >
-                <label
-                    style={{
-                        "display": "block",
-                        "marginBottom": "0.5rem",
-                        "fontWeight": "600",
-                        "color": "#374151"
-                    }}
-                >
+                Professional Profile
+            </h1>
+        </div>
+        <div className="card">
+            <div className="form-group">
+                <label className="form-label">
                     Full Name
                 </label>
                 <input
@@ -250,26 +240,11 @@ cl def Profile()  -> any {
                         "name", e.target.value
                     );} }
                     placeholder="e.g. Jane Doe"
-                    style={{
-                        "width": "100%",
-                        "padding": "0.75rem",
-                        "border": "1px solid #d1d5db",
-                        "borderRadius": "6px",
-                        "fontSize": "1rem"
-                    }}
+                    className="form-input"
                 />
             </div>
-            <div
-                style={{"marginBottom": "2rem"}}
-            >
-                <label
-                    style={{
-                        "display": "block",
-                        "marginBottom": "0.5rem",
-                        "fontWeight": "600",
-                        "color": "#374151"
-                    }}
-                >
+            <div className="form-group">
+                <label className="form-label">
                     Target Role
                 </label>
                 <input
@@ -280,40 +255,24 @@ cl def Profile()  -> any {
                         "target_role", e.target.value
                     );} }
                     placeholder="e.g. Senior Software Engineer"
-                    style={{
-                        "width": "100%",
-                        "padding": "0.75rem",
-                        "border": "1px solid #d1d5db",
-                        "borderRadius": "6px",
-                        "fontSize": "1rem"
-                    }}
+                    className="form-input"
                 />
                 <datalist id="profile-roles-list">
-                    {availableRoles.map(lambda r: any, i: int -> any {
-                        return <option key={i} value={r.title}>{r.description}</option>;
-                    })}
+                    {availableRoles.map(
+                        lambda  r: any , i: int  -> any{ return <option
+                            key={i}
+                            value={r.title}
+                        >
+                            {r.description}
+                        </option>; }
+                    )}
                 </datalist>
-                <p
-                    style={{
-                        "fontSize": "0.875rem",
-                        "color": "#6b7280",
-                        "marginTop": "0.5rem"
-                    }}
-                >
+                <p className="text-sub">
                     This role is used to generate your career roadmap and job suggestions.
                 </p>
             </div>
-            <div
-                style={{"marginBottom": "2rem"}}
-            >
-                <label
-                    style={{
-                        "display": "block",
-                        "marginBottom": "0.5rem",
-                        "fontWeight": "600",
-                        "color": "#374151"
-                    }}
-                >
+            <div className="form-group">
+                <label className="form-label">
                     Interests
                 </label>
                 <div
@@ -326,15 +285,11 @@ cl def Profile()  -> any {
                 >
                     {profile["interests"].map(
                         lambda  i: str  -> any{ return <span
+                            className="badge badge-gray"
                             style={{
-                                "background": "#f3f4f6",
-                                "padding": "0.5rem 1rem",
-                                "borderRadius": "9999px",
-                                "fontSize": "0.875rem",
                                 "display": "flex",
                                 "alignItems": "center",
-                                "gap": "0.5rem",
-                                "color": "#374151"
+                                "gap": "0.5rem"
                             }}
                         >
                             {i}
@@ -345,7 +300,7 @@ cl def Profile()  -> any {
                                 style={{
                                     "background": "none",
                                     "border": "none",
-                                    "color": "#ef4444",
+                                    "color": "var(--brand)",
                                     "cursor": "pointer",
                                     "fontWeight": "bold",
                                     "padding": "0",
@@ -368,42 +323,21 @@ cl def Profile()  -> any {
                             e.target.value
                         );} }
                         placeholder="Add interest..."
-                        style={{
-                            "flex": 1,
-                            "padding": "0.75rem",
-                            "border": "1px solid #d1d5db",
-                            "borderRadius": "6px"
-                        }}
+                        className="form-input"
+                        style={{"flex": 1}}
                     />
                     <button
                         onClick={lambda  e: any  -> None{ handleAddList(
                             "interests", newInterest, setNewInterest
                         );} }
-                        style={{
-                            "padding": "0.75rem 1.5rem",
-                            "background": "#4b5563",
-                            "color": "white",
-                            "border": "none",
-                            "borderRadius": "6px",
-                            "cursor": "pointer",
-                            "fontWeight": "600"
-                        }}
+                        className="btn btn-secondary"
                     >
                         Add
                     </button>
                 </div>
             </div>
-            <div
-                style={{"marginBottom": "2rem"}}
-            >
-                <label
-                    style={{
-                        "display": "block",
-                        "marginBottom": "0.5rem",
-                        "fontWeight": "600",
-                        "color": "#374151"
-                    }}
-                >
+            <div className="form-group">
+                <label className="form-label">
                     Career Goals
                 </label>
                 <div
@@ -416,15 +350,11 @@ cl def Profile()  -> any {
                 >
                     {profile["goals"].map(
                         lambda  g: str  -> any{ return <span
+                            className="badge badge-gray"
                             style={{
-                                "background": "#f3f4f6",
-                                "padding": "0.5rem 1rem",
-                                "borderRadius": "9999px",
-                                "fontSize": "0.875rem",
                                 "display": "flex",
                                 "alignItems": "center",
-                                "gap": "0.5rem",
-                                "color": "#374151"
+                                "gap": "0.5rem"
                             }}
                         >
                             {g}
@@ -435,7 +365,7 @@ cl def Profile()  -> any {
                                 style={{
                                     "background": "none",
                                     "border": "none",
-                                    "color": "#ef4444",
+                                    "color": "var(--brand)",
                                     "cursor": "pointer",
                                     "fontWeight": "bold",
                                     "padding": "0",
@@ -456,48 +386,24 @@ cl def Profile()  -> any {
                         value={newGoal}
                         onChange={lambda  e: any  -> None{ setNewGoal(e.target.value);} }
                         placeholder="Add goal..."
-                        style={{
-                            "flex": 1,
-                            "padding": "0.75rem",
-                            "border": "1px solid #d1d5db",
-                            "borderRadius": "6px"
-                        }}
+                        className="form-input"
+                        style={{"flex": 1}}
                     />
                     <button
                         onClick={lambda  e: any  -> None{ handleAddList(
                             "goals", newGoal, setNewGoal
                         );} }
-                        style={{
-                            "padding": "0.75rem 1.5rem",
-                            "background": "#4b5563",
-                            "color": "white",
-                            "border": "none",
-                            "borderRadius": "6px",
-                            "cursor": "pointer",
-                            "fontWeight": "600"
-                        }}
+                        className="btn btn-secondary"
                     >
                         Add
                     </button>
                 </div>
             </div>
-            <div
-                style={{"marginBottom": "2rem"}}
-            >
+            <div className="form-group">
                 <button
                     onClick={handleSaveProfile}
-                    style={{
-                        "width": "100%",
-                        "padding": "1rem",
-                        "background": "#2563eb",
-                        "color": "white",
-                        "border": "none",
-                        "borderRadius": "6px",
-                        "cursor": "pointer",
-                        "fontWeight": "bold",
-                        "fontSize": "1rem",
-                        "transition": "background 0.2s"
-                    }}
+                    className="btn btn-primary"
+                    style={{"width": "100%", "padding": "1rem", "fontSize": "1rem"}}
                 >
                     Save Profile Changes
                 </button>
@@ -505,7 +411,7 @@ cl def Profile()  -> any {
                 and <div
                     style={{
                         "marginTop": "1rem",
-                        "color": "#059669",
+                        "color": "var(--success)",
                         "textAlign": "center",
                         "fontWeight": "500"
                     }}
@@ -514,35 +420,24 @@ cl def Profile()  -> any {
                 </div>}
             </div>
             <div
-                style={{"borderTop": "1px solid #e5e7eb", "paddingTop": "2rem"}}
+                style={{"borderTop": "1px solid var(--border)", "paddingTop": "2rem"}}
             >
-                <label
-                    style={{
-                        "display": "block",
-                        "marginBottom": "0.5rem",
-                        "fontWeight": "600",
-                        "color": "#374151"
-                    }}
-                >
+                <label className="form-label">
                     Skills (Graph Nodes)
                 </label>
                 <p
-                    style={{
-                        "fontSize": "0.875rem",
-                        "color": "#6b7280",
-                        "marginBottom": "1rem"
-                    }}
+                    className="text-sub"
+                    style={{"marginBottom": "1rem"}}
                 >
                     These are stored directly in the knowledge graph and used for AI analysis.
                 </p>
-                
                 <div
                     style={{
                         "marginBottom": "1.5rem",
                         "padding": "1rem",
-                        "background": "#fef3c7",
-                        "borderRadius": "8px",
-                        "border": "1px solid #fbbf24"
+                        "background": "var(--secondary)",
+                        "borderRadius": "var(--radius-md)",
+                        "border": "1px solid var(--border)"
                     }}
                 >
                     <h4
@@ -550,44 +445,36 @@ cl def Profile()  -> any {
                             "fontSize": "0.875rem",
                             "fontWeight": "600",
                             "marginBottom": "0.5rem",
-                            "color": "#92400e"
+                            "color": "var(--brand)"
                         }}
                     >
                         ⚡ Quick Import from Resume
                     </h4>
                     <textarea
                         value={resumeText}
-                        onChange={lambda  e: any  -> None{ setResumeText(e.target.value);} }
+                        onChange={lambda  e: any  -> None{ setResumeText(
+                            e.target.value
+                        );} }
                         placeholder="Paste your resume text here (we'll extract skills automatically)..."
                         rows={4}
-                        style={{
-                            "width": "100%",
-                            "padding": "0.75rem",
-                            "border": "1px solid #fbbf24",
-                            "borderRadius": "6px",
-                            "fontSize": "0.875rem",
-                            "marginBottom": "0.5rem",
-                            "fontFamily": "monospace"
-                        }}
+                        className="form-input"
+                        style={{"marginBottom": "0.5rem", "fontFamily": "monospace"}}
                     />
                     <button
                         onClick={handleResumeUpload}
                         disabled={parseLoading or not resumeText}
+                        className="btn btn-primary"
                         style={{
-                            "padding": "0.5rem 1rem",
-                            "background": "#f59e0b",
-                            "color": "white",
-                            "border": "none",
-                            "borderRadius": "6px",
                             "fontSize": "0.875rem",
-                            "fontWeight": "600",
-                            "cursor": "pointer"
+                            "width": "100%",
+                            "justifyContent": "center",
+                            "marginTop": "0.5rem"
                         }}
                     >
-                        Parse Resume & Add Skills
+                        {parseLoading and "Parsing..."}{not parseLoading
+                        and "✨ Parse Resume & Add Skills"}
                     </button>
                 </div>
-                
                 <div
                     style={{
                         "display": "flex",
@@ -598,16 +485,11 @@ cl def Profile()  -> any {
                 >
                     {profile["skills"].map(
                         lambda  s: str  -> any{ return <span
+                            className="badge badge-blue"
                             style={{
-                                "background": "#dbeafe",
-                                "color": "#1e40af",
-                                "padding": "0.5rem 1rem",
-                                "borderRadius": "9999px",
-                                "fontSize": "0.875rem",
                                 "display": "flex",
                                 "alignItems": "center",
-                                "gap": "0.5rem",
-                                "fontWeight": "500"
+                                "gap": "0.5rem"
                             }}
                         >
                             {s}
@@ -616,7 +498,7 @@ cl def Profile()  -> any {
                                 style={{
                                     "background": "none",
                                     "border": "none",
-                                    "color": "#ef4444",
+                                    "color": "var(--error)",
                                     "cursor": "pointer",
                                     "fontWeight": "bold",
                                     "padding": "0",
@@ -637,24 +519,13 @@ cl def Profile()  -> any {
                         value={newSkill}
                         onChange={lambda  e: any  -> None{ setNewSkill(e.target.value);} }
                         placeholder="Add skill (e.g. Python)"
-                        style={{
-                            "flex": 1,
-                            "padding": "0.75rem",
-                            "border": "1px solid #d1d5db",
-                            "borderRadius": "6px"
-                        }}
+                        className="form-input"
+                        style={{"flex": 1}}
                     />
                     <button
                         onClick={handleAddSkill}
-                        style={{
-                            "padding": "0.75rem 1.5rem",
-                            "background": "#10b981",
-                            "color": "white",
-                            "border": "none",
-                            "borderRadius": "6px",
-                            "cursor": "pointer",
-                            "fontWeight": "600"
-                        }}
+                        className="btn btn-primary"
+                        style={{"background": "oklch(0.65 0.2 145)"}}
                     >
                         Add Skill
                     </button>

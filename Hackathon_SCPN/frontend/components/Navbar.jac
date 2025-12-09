@@ -20,92 +20,64 @@ cl def Navbar()  -> any {
 
     let navLinks = None;
     if isLoggedIn {
-        navLinks = <div
-            style={{"display": "flex", "gap": "1rem", "alignItems": "center"}}
-        >
+        navLinks = <div className="nav-items">
             <Link
                 to="/"
-                style={{"color": "white", "textDecoration": "none"}}
+                className="nav-link"
             >
                 Dashboard
             </Link>
             <Link
                 to="/career"
-                style={{"color": "white", "textDecoration": "none"}}
+                className="nav-link"
             >
                 Career Path
             </Link>
             <Link
                 to="/jobs"
-                style={{"color": "white", "textDecoration": "none"}}
+                className="nav-link"
             >
                 Jobs
             </Link>
             <Link
                 to="/profile"
-                style={{"color": "white", "textDecoration": "none"}}
+                className="nav-link"
             >
                 Profile
             </Link>
             <Link
                 to="/courses"
-                style={{"color": "white", "textDecoration": "none"}}
+                className="nav-link"
             >
                 Courses
             </Link>
             <button
                 onClick={handleLogout}
-                style={{
-                    "background": "transparent",
-                    "border": "1px solid white",
-                    "color": "white",
-                    "padding": "0.25rem 0.75rem",
-                    "borderRadius": "4px",
-                    "cursor": "pointer"
-                }}
+                className="btn btn-outline-light btn-sm"
             >
                 Logout
             </button>
         </div>;
     } else {
-        navLinks = <div
-            style={{"display": "flex", "gap": "1rem", "alignItems": "center"}}
-        >
+        navLinks = <div className="nav-items">
             <Link
                 to="/login"
-                style={{"color": "white", "textDecoration": "none"}}
+                className="nav-link"
             >
                 Login
             </Link>
             <Link
                 to="/signup"
-                style={{"color": "white", "textDecoration": "none"}}
+                className="nav-link"
             >
                 Sign Up
             </Link>
         </div>;
     }
 
-    return <nav
-        style={{
-            "background": "#2563eb",
-            "padding": "1rem",
-            "color": "white",
-            "marginBottom": "2rem"
-        }}
-    >
-        <div
-            style={{
-                "maxWidth": "1200px",
-                "margin": "0 auto",
-                "display": "flex",
-                "justifyContent": "space-between",
-                "alignItems": "center"
-            }}
-        >
-            <h1
-                style={{"margin": 0, "fontSize": "1.5rem"}}
-            >
+    return <nav className="navbar">
+        <div className="container navbar-container">
+            <h1 className="navbar-brand">
                 Career Navigator
             </h1>
             {navLinks}

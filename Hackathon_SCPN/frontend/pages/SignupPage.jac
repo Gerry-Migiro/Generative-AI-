@@ -41,75 +41,82 @@ cl def SignupPage()  -> any {
     }
 
     return <div
+        className="container"
         style={{
             "display": "flex",
             "justifyContent": "center",
             "alignItems": "center",
-            "height": "100vh",
-            "background": "#f3f4f6"
+            "height": "100vh"
         }}
     >
         <form
             onSubmit={handleSignup}
-            style={{
-                "background": "white",
-                "padding": "2rem",
-                "borderRadius": "8px",
-                "boxShadow": "0 4px 6px rgba(0,0,0,0.1)",
-                "width": "300px"
-            }}
+            className="card"
+            style={{"width": "100%", "maxWidth": "400px", "padding": "2.5rem"}}
         >
             <h2
-                style={{"textAlign": "center", "marginBottom": "1.5rem"}}
+                style={{
+                    "textAlign": "center",
+                    "marginBottom": "0.5rem",
+                    "fontSize": "1.75rem"
+                }}
             >
-                Sign Up
+                Create Account
             </h2>
-            <input
-                type="text"
-                placeholder="Username"
-                value={username}
-                onChange={handleUsernameChange}
+            <p
                 style={{
-                    "width": "100%",
-                    "padding": "0.5rem",
-                    "marginBottom": "1rem",
-                    "border": "1px solid #d1d5db",
-                    "borderRadius": "4px"
+                    "textAlign": "center",
+                    "color": "var(--muted-foreground)",
+                    "marginBottom": "2rem"
                 }}
-            />
-            <input
-                type="password"
-                placeholder="Password"
-                value={password}
-                onChange={handlePasswordChange}
-                style={{
-                    "width": "100%",
-                    "padding": "0.5rem",
-                    "marginBottom": "1.5rem",
-                    "border": "1px solid #d1d5db",
-                    "borderRadius": "4px"
-                }}
-            />
+            >
+                Join to accelerate your career
+            </p>
+            <div className="form-group">
+                <label className="form-label">
+                    Username
+                </label>
+                <input
+                    type="text"
+                    placeholder="Choose a username"
+                    value={username}
+                    onChange={handleUsernameChange}
+                    className="form-input"
+                    style={{"marginBottom": "1rem"}}
+                />
+            </div>
+            <div className="form-group">
+                <label className="form-label">
+                    Password
+                </label>
+                <input
+                    type="password"
+                    placeholder="Choose a strong password"
+                    value={password}
+                    onChange={handlePasswordChange}
+                    className="form-input"
+                    style={{"marginBottom": "1.5rem"}}
+                />
+            </div>
             {errorDisplay}
             <button
                 type="submit"
-                style={{
-                    "width": "100%",
-                    "padding": "0.75rem",
-                    "background": "#2563eb",
-                    "color": "white",
-                    "border": "none",
-                    "borderRadius": "4px",
-                    "cursor": "pointer"
-                }}
+                className="btn btn-primary"
+                style={{"width": "100%"}}
             >
-                Sign Up
+                Get Started
             </button>
             <div
-                style={{"textAlign": "center", "marginTop": "1rem"}}
+                style={{
+                    "textAlign": "center",
+                    "marginTop": "1.5rem",
+                    "fontSize": "0.9rem",
+                    "color": "var(--muted-foreground)"
+                }}
             >
+                Already have an account?
                 <Link to="/login">
-                    Back to Login
+                    Sign In
                 </Link>
             </div>
         </form>
