@@ -25,18 +25,17 @@ cl def CareerPath() -> any {
     let [error, setError] = useState("");
     let location = useLocation();
 
-    def safeParse(data: any, label: str) -> any {
+    def safeParse(data: any) -> any {
         if not data { return []; }
         try {
             if data.replace {
-                let clean = data.replace("```json", "").replace("```", "").trim();
+                let clean = data.split("```json").join("").split("```").join("").trim();
                 return JSON.parse(clean);
             }
             return data;
         } except err {
-            # If parsing fails, return the cleaned string
             if data.replace {
-                return data.replace("```json", "").replace("```", "").trim();
+                return data.split("```json").join("").split("```").join("").trim();
             }
             return data;
         }
@@ -209,9 +208,7 @@ cl def CareerPath() -> any {
         if content.replace and content.length < 20 { return null; }
         if Array.isArray(content) and content.length == 0 { return null; }
 
-        let sectionId = title.replace(" ", "").toLowerCase();
-
-        return <div id={sectionId} className="card" style={{"borderTop": "4px solid " + color, "padding": "2rem"}}>
+        return <div id={title.replace(" ", "").toLowerCase()} className="card" style={{"borderTop": "4px solid " + color, "padding": "2rem"}}>
             <h3 style={{"color": color, "fontSize": "1.5rem", "marginBottom": "1.5rem", "paddingBottom": "0.5rem", "borderBottom": "1px solid var(--border)"}}>{title}</h3>
             {renderContent(content)}
         </div>;
@@ -227,7 +224,7 @@ cl def CareerPath() -> any {
             if not data { return []; }
             
             # Parse if it's a string
-            let parsed = safeParse(data, "extract");
+            let parsed = safeParse(data);
             
             # If it's already a clean object/array, return it
             if parsed and (Array.isArray(parsed) or (parsed.strengths or parsed.demand or parsed.weeks or parsed.gaps)) {
@@ -242,10 +239,6 @@ cl def CareerPath() -> any {
         newRoadmap["market"] = extractData(report["market"]);
         newRoadmap["plan"] = extractData(report["plan"]);
         
-        if "gaps" in report {
-            newRoadmap["gaps"] = extractData(report["gaps"]);
-        }
-
         setRoadmap(newRoadmap);
     }
 
@@ -315,14 +308,6 @@ cl def CareerPath() -> any {
                         savedRoadmap["target_role"] = p["target_role"];
                         hasData = True; 
                     }
-                    if p["last_market"] { 
-                        savedRoadmap["market"] = p["last_market"]; 
-                        hasData = True; 
-                    }
-                    if p["last_roadmap_plan"] { 
-                        savedRoadmap["plan"] = p["last_roadmap_plan"]; 
-                        hasData = True; 
-                    }
 
                     if hasData {
                         await processResponse(savedRoadmap);
@@ -376,7 +361,6 @@ cl def CareerPath() -> any {
             {renderSection("Strategic Analysis", roadmap["strategy"], "var(--brand)")}
             {renderSection("Market Insights", roadmap["market"], "#059669")}
             {renderSection("Learning Plan", roadmap["plan"], "#d97706")}
-            {renderSection("Gaps Analysis", roadmap["gaps"], "var(--error)")}
         </div>}
     </div>;
 }

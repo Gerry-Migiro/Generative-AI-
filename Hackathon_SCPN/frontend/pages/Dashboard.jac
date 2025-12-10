@@ -298,15 +298,21 @@ cl def Dashboard()  -> any {
                     <h3 className="section-title">
                         Recommended Skills
                     </h3>
-                    <div
-                        style={{"display": "flex", "flexWrap": "wrap", "gap": "0.5rem"}}
-                    >
-                        {gaps.length > 0
-                        and gaps.map(
-                            lambda  g: any  -> any{ return <span className="badge badge-yellow">
+                    <div className="flex-col" style={{"gap": "0.5rem", "width": "100%"}}>
+                        {gaps.length > 0 and gaps.map(
+                            lambda  g: any  -> any{ return <div style={{
+                                "background": "#fefce8",
+                                "border": "1px solid #fef08a",
+                                "borderRadius": "6px",
+                                "padding": "0.75rem",
+                                "color": "#854d0e",
+                                "fontSize": "0.9rem",
+                                "lineHeight": "1.5"
+                            }}>
                                 {g}
-                            </span>; }
-                        )}{gaps.length == 0
+                            </div>; }
+                        )}
+                        {gaps.length == 0
                         and <span className="text-sub">
                             No recommendations yet.
                         </span>}
