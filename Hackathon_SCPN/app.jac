@@ -516,7 +516,7 @@ walker fetch_jobs {
 
         try {
             # Fetch from Remotive API (Software Development category)
-            # Increased limit to 50 to get more variety
+            
             let url = "https://remotive.com/api/remote-jobs?category=software-dev&limit=50";
 
             let request = Request(url);

@@ -189,8 +189,7 @@ cl def Profile()  -> any {
                         'total_skills'
                     ]}"
                 );
-                # Clear resume text
-                # Clear resume text
+              
                 setResumeText("");
             }
         } except err {
