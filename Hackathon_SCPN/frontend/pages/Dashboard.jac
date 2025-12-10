@@ -7,16 +7,16 @@ cl def Dashboard()  -> any {
     if not jacIsLoggedIn() {
         return <Navigate to="/login" />;
     }
-    [profile, setProfile] = useState(None);
-    [gaps, setGaps] = useState([]);
-    [roadmap, setRoadmap] = useState([]);
-    navigate = useNavigate();
+    let [profile, setProfile] = useState(None);
+    let [gaps, setGaps] = useState([]);
+    let [roadmap, setRoadmap] = useState([]);
+    let navigate = useNavigate();
 
     async def loadData()  -> None {
         try {
             res = await root spawn get_profile();
             if res.reports {
-                p = res.reports[0];
+                let p = res.reports[0];
                 if p and not p["error"] {
                     setProfile(p);
                     # Redirect to profile if name is empty
@@ -27,12 +27,12 @@ cl def Dashboard()  -> any {
                     # Parse strategy to extract gaps
                     if p["last_strategy"] and p["last_strategy"] != "[]" {
                         try {
-                            clean_strategy = p["last_strategy"].replace(
+                            let clean_strategy = p["last_strategy"].replace(
                                 "```json", ""
                             ).replace(
                                 "```", ""
                             ).trim();
-                            strategy = JSON.parse(clean_strategy);
+                            let strategy = JSON.parse(clean_strategy);
                             if strategy.gaps && Array.isArray(strategy.gaps) {
                                 setGaps(strategy.gaps);
                             }
@@ -43,12 +43,12 @@ cl def Dashboard()  -> any {
                     # Parse learning plan
                     if p["last_roadmap_plan"] and p["last_roadmap_plan"] != "[]" {
                         try {
-                            clean_plan = p["last_roadmap_plan"].replace(
+                            let clean_plan = p["last_roadmap_plan"].replace(
                                 "```json", ""
                             ).replace(
                                 "```", ""
                             ).trim();
-                            plan = JSON.parse(clean_plan);
+                            let plan = JSON.parse(clean_plan);
                             if plan.weeks {
                                 setRoadmap(plan.weeks);
                             }

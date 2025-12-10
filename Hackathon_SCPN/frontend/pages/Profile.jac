@@ -22,19 +22,19 @@ walker parse_resume {
 }
 
 cl def Profile()  -> any {
-    [profile, setProfile] = useState(
+    let [profile, setProfile] = useState(
         {"name": "", "interests": [], "goals": [], "skills": [], "target_role": ""}
     );
-    [availableRoles, setAvailableRoles] = useState([]);
-    [newSkill, setNewSkill] = useState("");
-    [newInterest, setNewInterest] = useState("");
-    [newGoal, setNewGoal] = useState("");
-    [message, setMessage] = useState("");
-    [loading, setLoading] = useState(False);
-    [resumeText, setResumeText] = useState("");
-    [parseLoading, setParseLoading] = useState(False);
-    [resumeText, setResumeText] = useState("");
-    [parseLoading, setParseLoading] = useState(False);
+    let [availableRoles, setAvailableRoles] = useState([]);
+    let [newSkill, setNewSkill] = useState("");
+    let [newInterest, setNewInterest] = useState("");
+    let [newGoal, setNewGoal] = useState("");
+    let [message, setMessage] = useState("");
+    let [loading, setLoading] = useState(False);
+    let [resumeText, setResumeText] = useState("");
+    let [parseLoading, setParseLoading] = useState(False);
+    let [resumeText, setResumeText] = useState("");
+    let [parseLoading, setParseLoading] = useState(False);
 
     # Load profile on mount
     useEffect(
@@ -43,7 +43,7 @@ cl def Profile()  -> any {
 
             # Fetch available roles
             try {
-                rolesRes = await root spawn get_all_roles();
+                let rolesRes = await root spawn get_all_roles();
                 if rolesRes.reports and rolesRes.reports.length > 0 {
                     setAvailableRoles(rolesRes.reports[0]);
                 }
@@ -51,9 +51,9 @@ cl def Profile()  -> any {
                 console.error("Error fetching roles:", err);
             }
 
-            res = await root spawn get_profile();
+            let res = await root spawn get_profile();
             if res.reports and res.reports.length > 0 {
-                p = res.reports[0];
+                let p = res.reports[0];
                 if p {
                     setProfile(p);
                 }
@@ -70,10 +70,10 @@ cl def Profile()  -> any {
         }
 
         # Optimistic update
-        currentSkills = profile["skills"];
-        updatedSkills = currentSkills.concat([newSkill]);
+        let currentSkills = profile["skills"];
+        let updatedSkills = currentSkills.concat([newSkill]);
 
-        newProfile = {
+        let newProfile = {
             "name": profile["name"],
             "interests": profile["interests"],
             "goals": profile["goals"],
@@ -86,7 +86,7 @@ cl def Profile()  -> any {
         await root spawn add_skill(skill_name=newSkill);
 
         # Sync to be safe
-        res = await root spawn get_profile();
+        let res = await root spawn get_profile();
         if res.reports {
             setProfile(res.reports[0]);
         }
@@ -96,11 +96,11 @@ cl def Profile()  -> any {
 
     async def handleDeleteSkill(skillName: str) -> None {
         # Optimistic update
-        updatedSkills = profile["skills"].filter(
+        let updatedSkills = profile["skills"].filter(
             lambda  s: str  -> bool{ return s != skillName; }
         );
 
-        newProfile = {
+        let newProfile = {
             "name": profile["name"],
             "interests": profile["interests"],
             "goals": profile["goals"],
@@ -113,7 +113,7 @@ cl def Profile()  -> any {
         await root spawn delete_skill(skill_name=skillName);
 
         # Sync to be safe
-        res = await root spawn get_profile();
+        let res = await root spawn get_profile();
         if res.reports {
             setProfile(res.reports[0]);
         }
@@ -121,7 +121,7 @@ cl def Profile()  -> any {
 
     # --- Profile Fields Management (Batch Save) ---
     def handleUpdateField(key: str, value: any) -> None {
-        newProfile = {
+        let newProfile = {
             "name": profile["name"],
             "interests": profile["interests"],
             "goals": profile["goals"],
@@ -134,15 +134,15 @@ cl def Profile()  -> any {
 
     def handleAddList(key: str, value: str, setter: any) -> None {
         if value {
-            currentList = profile[key];
-            updatedList = currentList.concat([value]);
+            let currentList = profile[key];
+            let updatedList = currentList.concat([value]);
             handleUpdateField(key, updatedList);
             setter("");
         }
     }
 
     def handleDeleteList(key: str, value: str) -> None {
-        updatedList = profile[key].filter(
+        let updatedList = profile[key].filter(
             lambda  i: str  -> bool{ return i != value; }
         );
         handleUpdateField(key, updatedList);
@@ -172,18 +172,18 @@ cl def Profile()  -> any {
         setMessage("Parsing resume...");
 
         try {
-            res = await root spawn parse_resume(resume_text=resumeText);
+            let res = await root spawn parse_resume(resume_text=resumeText);
 
             if res.reports and res.reports.length > 0 {
-                result = res.reports[0];
+                let result = res.reports[0];
                 # Refresh profile to show newly added skills
-                profileRes = await root spawn get_profile();
+                let profileRes = await root spawn get_profile();
                 if profileRes.reports {
                     setProfile(profileRes.reports[0]);
                 }
                 # Show success message with details
-                added_count = result["added_skills"].length;
-                skipped_count = result["skipped_skills"].length;
+                let added_count = result["added_skills"].length;
+                let skipped_count = result["skipped_skills"].length;
                 setMessage(
                     f"Resume parsed! Added {added_count} new skills, skipped {skipped_count} existing skills. Total skills: {result[
                         'total_skills'

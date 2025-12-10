@@ -2,10 +2,10 @@ cl import from react { useState }
 cl import from "@jac-client/utils" { Link, useNavigate, jacLogin }
 
 cl def LoginPage()  -> any {
-    [username, setUsername] = useState("");
-    [password, setPassword] = useState("");
-    [error, setError] = useState("");
-    navigate = useNavigate();
+    let [username, setUsername] = useState("");
+    let [password, setPassword] = useState("");
+    let [error, setError] = useState("");
+    let navigate = useNavigate();
 
     async def handleLogin(e: any) -> None {
         e.preventDefault();
@@ -31,7 +31,7 @@ cl def LoginPage()  -> any {
         setPassword(e.target.value);
     }
 
-    errorDisplay = None;
+    let errorDisplay = None;
     if error {
         errorDisplay = <div
             style={{"color": "#dc2626", "fontSize": "14px", "marginBottom": "10px"}}

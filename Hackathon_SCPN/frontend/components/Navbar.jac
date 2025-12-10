@@ -8,9 +8,9 @@ cl import from "@jac-client/utils" {
 }
 
 cl def Navbar()  -> any {
-    location = useLocation();
-    isLoggedIn = jacIsLoggedIn();
-    navigate = useNavigate();
+    let location = useLocation();
+    let isLoggedIn = jacIsLoggedIn();
+    let navigate = useNavigate();
 
     def handleLogout(e: any) -> None {
         e.preventDefault();
@@ -18,7 +18,7 @@ cl def Navbar()  -> any {
         navigate("/login");
     }
 
-    navLinks = None;
+    let navLinks = None;
     if isLoggedIn {
         navLinks = <div className="nav-items">
             <Link

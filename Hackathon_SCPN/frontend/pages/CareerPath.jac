@@ -18,18 +18,18 @@ walker get_all_roles {}
 cl def CareerPath() -> any {
     if not jacIsLoggedIn() { return <Navigate to="/login" />; }
     
-    [role, setRole] = useState("");
-    [availableRoles, setAvailableRoles] = useState([]);
-    [roadmap, setRoadmap] = useState(None);
-    [loading, setLoading] = useState(False);
-    [error, setError] = useState("");
-    location = useLocation();
+    let [role, setRole] = useState("");
+    let [availableRoles, setAvailableRoles] = useState([]);
+    let [roadmap, setRoadmap] = useState(None);
+    let [loading, setLoading] = useState(False);
+    let [error, setError] = useState("");
+    let location = useLocation();
 
     def safeParse(data: any, label: str) -> any {
         if not data { return []; }
         try {
             if data.replace {
-                clean = data.replace("```json", "").replace("```", "").trim();
+                let clean = data.replace("```json", "").replace("```", "").trim();
                 return JSON.parse(clean);
             }
             return data;
@@ -80,7 +80,7 @@ cl def CareerPath() -> any {
 
         if content.demand or content.salary_range or content.top_companies {
             # Market object
-            demandColor = "#6b7280";
+            let demandColor = "#6b7280";
             if content.demand == "High" {
                 demandColor = "#059669";
             } elif content.demand == "Medium" {
@@ -131,10 +131,10 @@ cl def CareerPath() -> any {
         
         # Handle String Content (Markdown-like)
         if content.replace {
-            lines = content.split("\n");
+            let lines = content.split("\n");
             return <div style={{"display": "flex", "flexDirection": "column", "gap": "0.5rem"}}>
                 {lines.map(lambda line: str, i: int -> any {
-                    cleanLine = line.trim();
+                    let cleanLine = line.trim();
                     if not cleanLine { return null; }
                     
                     # Headers
@@ -147,8 +147,8 @@ cl def CareerPath() -> any {
 
                     # List items
                     if cleanLine.startsWith("* ") or cleanLine.startsWith("- ") {
-                        text = cleanLine.substring(2);
-                        parts = text.split("**");
+                        let text = cleanLine.substring(2);
+                        let parts = text.split("**");
                         return <div key={i} style={{"display": "flex", "gap": "0.5rem", "alignItems": "flex-start", "paddingLeft": "0.5rem"}}>
                             <span style={{"color": "#3b82f6", "marginTop": "0.4rem", "fontSize": "0.8rem"}}>●</span>
                             <span style={{"lineHeight": "1.6", "color": "var(--card-foreground)"}}>
@@ -163,7 +163,7 @@ cl def CareerPath() -> any {
                     }
 
                     # Regular paragraphs
-                    parts = cleanLine.split("**");
+                    let parts = cleanLine.split("**");
                     return <p key={i} style={{"lineHeight": "1.6", "color": "var(--card-foreground)", "margin": "0"}}>
                         {parts.map(lambda p: str, j: int -> any {
                             if j % 2 == 1 {
@@ -180,7 +180,7 @@ cl def CareerPath() -> any {
         if Array.isArray(content) {
             return <div style={{"display": "grid", "gap": "1rem", "gridTemplateColumns": "repeat(auto-fit, minmax(300px, 1fr))"}}>
                 {content.map(lambda item: any, i: int -> any {
-                    desc = item["description"] or item["details"];
+                    let desc = item["description"] or item["details"];
                     if not desc and item["actions"] and Array.isArray(item["actions"]) {
                         desc = item["actions"].join(", ");
                     }
@@ -209,7 +209,7 @@ cl def CareerPath() -> any {
         if content.replace and content.length < 20 { return null; }
         if Array.isArray(content) and content.length == 0 { return null; }
 
-        sectionId = title.replace(" ", "").toLowerCase();
+        let sectionId = title.replace(" ", "").toLowerCase();
 
         return <div id={sectionId} className="card" style={{"borderTop": "4px solid " + color, "padding": "2rem"}}>
             <h3 style={{"color": color, "fontSize": "1.5rem", "marginBottom": "1.5rem", "paddingBottom": "0.5rem", "borderBottom": "1px solid var(--border)"}}>{title}</h3>
@@ -218,7 +218,7 @@ cl def CareerPath() -> any {
     }
 
     async def processResponse(report: any) -> None {
-        newRoadmap = {};
+        let newRoadmap = {};
         
         newRoadmap["target_role"] = report["target_role"];
         
@@ -227,7 +227,7 @@ cl def CareerPath() -> any {
             if not data { return []; }
             
             # Parse if it's a string
-            parsed = safeParse(data, "extract");
+            let parsed = safeParse(data, "extract");
             
             # If it's already a clean object/array, return it
             if parsed and (Array.isArray(parsed) or (parsed.strengths or parsed.demand or parsed.weeks or parsed.gaps)) {
@@ -256,7 +256,7 @@ cl def CareerPath() -> any {
         setRoadmap(None);
         
         try {
-            res = await root spawn generate_roadmap(target_role=role);
+            let res = await root spawn generate_roadmap(target_role=role);
 
             if res.reports and res.reports.length > 0 {
                 await processResponse(res.reports[0]);
@@ -275,7 +275,7 @@ cl def CareerPath() -> any {
         async def init() -> None {
             # Fetch available roles
             try {
-                rolesRes = await root spawn get_all_roles();
+                let rolesRes = await root spawn get_all_roles();
                 if rolesRes.reports and rolesRes.reports.length > 0 {
                     setAvailableRoles(rolesRes.reports[0]);
                 }
@@ -294,7 +294,7 @@ cl def CareerPath() -> any {
             # Scroll to learning plan if requested
             if location.state and location.state["scrollTo"] == "learningPlan" {
                 setTimeout(lambda -> None {
-                    element = document.getElementById("learningplan");
+                    let element = document.getElementById("learningplan");
                     if element {
                         element.scrollIntoView({"behavior": "smooth", "block": "start"});
                     }
@@ -302,13 +302,13 @@ cl def CareerPath() -> any {
             }
 
             try {
-                res = await root spawn get_profile();
+                let res = await root spawn get_profile();
                 if res.reports and res.reports.length > 0 {
-                    p = res.reports[0];
+                    let p = res.reports[0];
                     if p["target_role"] { setRole(p["target_role"]); }
                     
-                    savedRoadmap = {};
-                    hasData = False;
+                    let savedRoadmap = {};
+                    let hasData = False;
 
                     if p["last_strategy"] { 
                         savedRoadmap["strategy"] = p["last_strategy"]; 
