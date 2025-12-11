@@ -278,7 +278,7 @@ Unlike traditional REST APIs, our OSP implementation provides:
 
 - [`app.jac`](app.jac) - Main backend (OSP graph, walkers, multi-agent system)
 - [`frontend/pages/`](frontend/pages/) - Jac Client components (Dashboard, Profile, Career, Jobs, Courses)
-- [`DEMO_SCRIPT.md`](DEMO_SCRIPT.md) - Complete video demo script with timestamps
+
 
 ## 🧪 Testing
 
@@ -295,17 +295,7 @@ jac serve app.jac
 
 Access at `http://localhost:8000`
 
-## 🎬 Demo Video
 
-Follow the complete script in [DEMO_SCRIPT.md](DEMO_SCRIPT.md) to record your 4-5 minute demo video.
-
-**Key Points to Cover:**
-1. Resume parsing with byLLM (0:30-1:30)
-2. OSP graph role matching (1:30-2:30)
-3. Multi-agent system output (2:30-3:30)
-4. Jac Client Spawn() calls (3:30-4:00)
-
----
 
 **Built for AI Hackathon 2025** | Deadline: Dec 15, 2025  
 [Discord](https://discord.gg/jSQP7rjA) | [Jaseci GitHub](https://github.com/jaseci-labs/jaseci)
