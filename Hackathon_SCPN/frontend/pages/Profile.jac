@@ -33,8 +33,6 @@ cl def Profile()  -> any {
     let [loading, setLoading] = useState(False);
     let [resumeText, setResumeText] = useState("");
     let [parseLoading, setParseLoading] = useState(False);
-    let [resumeText, setResumeText] = useState("");
-    let [parseLoading, setParseLoading] = useState(False);
 
     # Load profile on mount
     useEffect(
@@ -189,7 +187,6 @@ cl def Profile()  -> any {
                         'total_skills'
                     ]}"
                 );
-               
                 # Clear resume text
                 setResumeText("");
             }
@@ -247,26 +244,43 @@ cl def Profile()  -> any {
                 <label className="form-label">
                     Target Role
                 </label>
-                <input
-                    list="profile-roles-list"
-                    type="text"
-                    value={profile["target_role"]}
-                    onChange={lambda  e: any  -> None{ handleUpdateField(
-                        "target_role", e.target.value
-                    );} }
-                    placeholder="e.g. Senior Software Engineer"
-                    className="form-input"
-                />
-                <datalist id="profile-roles-list">
-                    {availableRoles.map(
-                        lambda  r: any , i: int  -> any{ return <option
-                            key={i}
-                            value={r.title}
+                <div
+                    style={{"display": "flex", "gap": "0.5rem"}}
+                >
+                    <input
+                        type="text"
+                        value={profile["target_role"]}
+                        onChange={lambda  e: any  -> None{ handleUpdateField(
+                            "target_role", e.target.value
+                        );} }
+                        placeholder="e.g. Senior Software Engineer"
+                        className="form-input"
+                        style={{"flex": 1}}
+                    />
+                    <select
+                        value=""
+                        onChange={lambda  e: any  -> None{ handleUpdateField(
+                            "target_role", e.target.value
+                        );} }
+                        className="form-input"
+                        style={{"width": "180px"}}
+                    >
+                        <option
+                            value=""
+                            disabled
                         >
-                            {r.description}
-                        </option>; }
-                    )}
-                </datalist>
+                            Select Role...
+                        </option>
+                        {availableRoles.map(
+                            lambda  r: any , i: int  -> any{ return <option
+                                key={i}
+                                value={r.title}
+                            >
+                                {r.title}
+                            </option>; }
+                        )}
+                    </select>
+                </div>
                 <p className="text-sub">
                     This role is used to generate your career roadmap and job suggestions.
                 </p>

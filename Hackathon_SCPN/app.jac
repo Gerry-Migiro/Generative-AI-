@@ -91,7 +91,7 @@ walker calculate_role_match {
             }
         }
         if not role_node {
-            report {"error": "Role not found", "score": 0.0};
+            report {"error": "Role not found", "score": 0.0} ;
         }
     }
 
@@ -99,25 +99,25 @@ walker calculate_role_match {
         # OSP Graph Reasoning: Traverse Role->RequiresSkill->Skill edges
         let total_importance = 0;
         let matched_importance = 0;
-        
+
         # Get user node to check skills
         let user_node = None;
         for u in [root-->](`?User) {
             user_node = u;
             break;
         }
-        
+
         if not user_node {
-            report {"error": "User not found", "score": 0.0};
+            report {"error": "User not found", "score": 0.0} ;
             return;
         }
-        
+
         # Collect user's skills
         let user_skills = [];
         for s in [user_node->:UserSkill:->] {
             user_skills.append(s.name);
         }
-        
+
         # Traverse role requirements using OSP edge filtering
         for skill_edge in [here->:RequiresSkill:->] {
             let skill_node = [here->:RequiresSkill:->(`?Skill)][-1];
@@ -128,10 +128,8 @@ walker calculate_role_match {
                     importance = e.importance if hasattr(e, 'importance') else 5;
                     break;
                 }
-                
                 total_importance += importance;
                 self.required_skills.append(skill_node.name);
-                
                 # Check if user has this skill
                 if skill_node.name in user_skills {
                     matched_importance += importance;
@@ -141,14 +139,14 @@ walker calculate_role_match {
                 }
             }
         }
-        
+
         # Calculate match score (0-100)
         if total_importance > 0 {
             self.match_score = (matched_importance / total_importance) * 100;
         } else {
             self.match_score = 0.0;
         }
-        
+
         report {
             "role": self.target_role,
             "match_score": round(self.match_score, 2),
@@ -157,7 +155,7 @@ walker calculate_role_match {
             "missing_skills": self.missing_skills,
             "total_importance": total_importance,
             "matched_importance": matched_importance
-        };
+        } ;
     }
 }
 
@@ -272,7 +270,7 @@ walker seed_database {
         let role_productmgr = None;
         let role_devops = None;
         let role_ux = None;
-        
+
         for r in roles {
             if r.title == "Software Developer" {
                 role_softdev = r;
@@ -286,7 +284,7 @@ walker seed_database {
                 role_ux = r;
             }
         }
-        
+
         # Software Developer requires these skills (importance 1-10)
         if role_softdev {
             role_softdev +>: RequiresSkill(importance=9) :+> skill_python;
@@ -295,7 +293,7 @@ walker seed_database {
             role_softdev +>: RequiresSkill(importance=6) :+> skill_sql;
             role_softdev +>: RequiresSkill(importance=5) :+> skill_docker;
         }
-        
+
         # Data Scientist requires these skills
         if role_datascience {
             role_datascience +>: RequiresSkill(importance=10) :+> skill_python;
@@ -303,7 +301,7 @@ walker seed_database {
             role_datascience +>: RequiresSkill(importance=8) :+> skill_pandas;
             role_datascience +>: RequiresSkill(importance=7) :+> skill_sql;
         }
-        
+
         # DevOps Engineer requires these skills
         if role_devops {
             role_devops +>: RequiresSkill(importance=9) :+> skill_docker;
@@ -311,19 +309,19 @@ walker seed_database {
             role_devops +>: RequiresSkill(importance=7) :+> skill_python;
             role_devops +>: RequiresSkill(importance=6) :+> skill_sql;
         }
-        
+
         # Product Manager requires these skills
         if role_productmgr {
             role_productmgr +>: RequiresSkill(importance=8) :+> skill_agile;
             role_productmgr +>: RequiresSkill(importance=5) :+> skill_sql;
         }
-        
+
         # UX Designer requires these skills
         if role_ux {
             role_ux +>: RequiresSkill(importance=10) :+> skill_figma;
             role_ux +>: RequiresSkill(importance=4) :+> skill_js;
         }
-        
+
         # OSP Graph: Create Skill->Skill prerequisites with PrerequisiteOf edges
         # Python is prerequisite for more advanced skills
         skill_python +>: PrerequisiteOf(difficulty_gap=2) :+> skill_pandas;
@@ -617,7 +615,9 @@ walker generate_roadmap {
             let matcher = calculate_role_match(target_role=self.target_role) spawn root;
             if matcher and len(matcher.reports) > 0 {
                 graph_match = matcher.reports[0];
-                print("OSP Graph Match Score: " + str(graph_match.get("match_score", 0)) + "%");
+                print(
+                    "OSP Graph Match Score: " + str(graph_match.get("match_score", 0)) + "%"
+                );
             }
         } except Exception as e {
             print("Graph match calculation skipped: " + str(e));
@@ -674,7 +674,7 @@ walker generate_roadmap {
         here.target_role = self.target_role;
 
         print("Reporting results...");
-        
+
         # Include OSP graph match data in response
         let response = {
             "target_role": self.target_role,
@@ -682,12 +682,12 @@ walker generate_roadmap {
             "market": market,
             "plan": plan
         };
-        
+
         if graph_match {
             response["graph_match"] = graph_match;
         }
-        
-        report response;
+
+        report response ;
     }
 }
 

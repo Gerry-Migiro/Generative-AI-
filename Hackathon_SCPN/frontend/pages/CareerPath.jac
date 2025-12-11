@@ -326,19 +326,27 @@ cl def CareerPath() -> any {
         <div className="card" style={{"marginBottom": "3rem", "maxWidth": "800px", "margin": "0 auto 3rem auto"}}>
             <div style={{"display": "flex", "gap": "1rem", "flexWrap": "wrap"}}>
                 <div style={{"flex": 1}}>
-                    <input 
-                        list="career-roles-list"
-                        type="text" 
-                        placeholder="Enter Target Role (e.g. Senior Python Developer)" 
-                        value={role} 
-                        onChange={lambda e: any -> None { setRole(e.target.value); }} 
-                        className="form-input"
-                    />
-                    <datalist id="career-roles-list">
-                        {availableRoles.map(lambda r: any, i: int -> any {
-                            return <option key={i} value={r.title}>{r.description}</option>;
-                        })}
-                    </datalist>
+                    <div style={{"display": "flex", "gap": "0.5rem"}}>
+                        <input 
+                            type="text" 
+                            placeholder="Enter Target Role (e.g. Senior Python Developer)" 
+                            value={role} 
+                            onChange={lambda e: any -> None { setRole(e.target.value); }} 
+                            className="form-input"
+                            style={{"flex": 1}}
+                        />
+                        <select 
+                            value=""
+                            onChange={lambda e: any -> None { setRole(e.target.value); }} 
+                            className="form-input"
+                            style={{"width": "180px"}}
+                        >
+                            <option value="" disabled>Select Role...</option>
+                            {availableRoles.map(lambda r: any, i: int -> any {
+                                return <option key={i} value={r.title}>{r.title}</option>;
+                            })}
+                        </select>
+                    </div>
                 </div>
                 <button 
                     onClick={generate} 
