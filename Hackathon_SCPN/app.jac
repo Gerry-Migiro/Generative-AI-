@@ -43,6 +43,14 @@ edge UserSkill {
     has level: int = 0;
 }
 
+edge RequiresSkill {
+    has importance: int = 5;  # 1-10 scale: how critical this skill is for the role
+}
+
+edge PrerequisiteOf {
+    has difficulty_gap: int = 1;  # How many levels harder (1=easy step, 5=major leap)
+}
+
 # --- Agents ---
 # Multi-Agent System: Career Advisor with 3 specialized agents
 # Agent Flow: User Request → generate_roadmap → analyze_career_strategy → analyze_market → create_learning_plan
@@ -64,6 +72,94 @@ def create_learning_plan(
 
 """Extract technical skills from resume text. Return only concrete tools, languages, frameworks, and technologies as nouns. Skip job titles, company names, soft skills, general and unecessary descriptions."""
 def resume_parser(resume_text: str) -> list[str] by llm(method="Reason");
+
+# --- OSP Graph Traversal Walker ---
+walker calculate_role_match {
+    has target_role: str;
+    has match_score: float = 0.0;
+    has required_skills: list = [];
+    has missing_skills: list = [];
+    has matched_skills: list = [];
+
+    can find_role with `root entry {
+        # Find target role node using graph traversal
+        let role_node = None;
+        for r in [here-->](`?Role) {
+            if r.title == self.target_role {
+                role_node = r;
+                visit role_node;
+            }
+        }
+        if not role_node {
+            report {"error": "Role not found", "score": 0.0};
+        }
+    }
+
+    can score_match with Role entry {
+        # OSP Graph Reasoning: Traverse Role->RequiresSkill->Skill edges
+        let total_importance = 0;
+        let matched_importance = 0;
+        
+        # Get user node to check skills
+        let user_node = None;
+        for u in [root-->](`?User) {
+            user_node = u;
+            break;
+        }
+        
+        if not user_node {
+            report {"error": "User not found", "score": 0.0};
+            return;
+        }
+        
+        # Collect user's skills
+        let user_skills = [];
+        for s in [user_node->:UserSkill:->] {
+            user_skills.append(s.name);
+        }
+        
+        # Traverse role requirements using OSP edge filtering
+        for skill_edge in [here->:RequiresSkill:->] {
+            let skill_node = [here->:RequiresSkill:->(`?Skill)][-1];
+            if skill_node {
+                let importance = 5;  # default
+                # Get actual importance from edge
+                for e in [here->:RequiresSkill:target==skill_node:->] {
+                    importance = e.importance if hasattr(e, 'importance') else 5;
+                    break;
+                }
+                
+                total_importance += importance;
+                self.required_skills.append(skill_node.name);
+                
+                # Check if user has this skill
+                if skill_node.name in user_skills {
+                    matched_importance += importance;
+                    self.matched_skills.append(skill_node.name);
+                } else {
+                    self.missing_skills.append(skill_node.name);
+                }
+            }
+        }
+        
+        # Calculate match score (0-100)
+        if total_importance > 0 {
+            self.match_score = (matched_importance / total_importance) * 100;
+        } else {
+            self.match_score = 0.0;
+        }
+        
+        report {
+            "role": self.target_role,
+            "match_score": round(self.match_score, 2),
+            "required_skills": self.required_skills,
+            "matched_skills": self.matched_skills,
+            "missing_skills": self.missing_skills,
+            "total_importance": total_importance,
+            "matched_importance": matched_importance
+        };
+    }
+}
 
 # --- Walkers ---
 walker seed_database {
@@ -157,16 +253,83 @@ walker seed_database {
         );
 
         # Create Skills
-        here ++> Skill(name="Python");
-        here ++> Skill(name="JavaScript");
-        here ++> Skill(name="React");
-        here ++> Skill(name="Machine Learning");
-        here ++> Skill(name="AWS");
-        here ++> Skill(name="Pandas");
-        here ++> Skill(name="SQL");
-        here ++> Skill(name="Docker");
-        here ++> Skill(name="Figma");
-        here ++> Skill(name="Agile");
+        let skill_python = here ++> Skill(name="Python");
+        let skill_js = here ++> Skill(name="JavaScript");
+        let skill_react = here ++> Skill(name="React");
+        let skill_ml = here ++> Skill(name="Machine Learning");
+        let skill_aws = here ++> Skill(name="AWS");
+        let skill_pandas = here ++> Skill(name="Pandas");
+        let skill_sql = here ++> Skill(name="SQL");
+        let skill_docker = here ++> Skill(name="Docker");
+        let skill_figma = here ++> Skill(name="Figma");
+        let skill_agile = here ++> Skill(name="Agile");
+
+        # OSP Graph: Create Role->Skill relationships with RequiresSkill edges
+        # Get role references
+        let roles = [here-->](`?Role);
+        let role_softdev = None;
+        let role_datascience = None;
+        let role_productmgr = None;
+        let role_devops = None;
+        let role_ux = None;
+        
+        for r in roles {
+            if r.title == "Software Developer" {
+                role_softdev = r;
+            } elif r.title == "Data Scientist" {
+                role_datascience = r;
+            } elif r.title == "Product Manager" {
+                role_productmgr = r;
+            } elif r.title == "DevOps Engineer" {
+                role_devops = r;
+            } elif r.title == "UX Designer" {
+                role_ux = r;
+            }
+        }
+        
+        # Software Developer requires these skills (importance 1-10)
+        if role_softdev {
+            role_softdev +>: RequiresSkill(importance=9) :+> skill_python;
+            role_softdev +>: RequiresSkill(importance=8) :+> skill_js;
+            role_softdev +>: RequiresSkill(importance=7) :+> skill_react;
+            role_softdev +>: RequiresSkill(importance=6) :+> skill_sql;
+            role_softdev +>: RequiresSkill(importance=5) :+> skill_docker;
+        }
+        
+        # Data Scientist requires these skills
+        if role_datascience {
+            role_datascience +>: RequiresSkill(importance=10) :+> skill_python;
+            role_datascience +>: RequiresSkill(importance=9) :+> skill_ml;
+            role_datascience +>: RequiresSkill(importance=8) :+> skill_pandas;
+            role_datascience +>: RequiresSkill(importance=7) :+> skill_sql;
+        }
+        
+        # DevOps Engineer requires these skills
+        if role_devops {
+            role_devops +>: RequiresSkill(importance=9) :+> skill_docker;
+            role_devops +>: RequiresSkill(importance=8) :+> skill_aws;
+            role_devops +>: RequiresSkill(importance=7) :+> skill_python;
+            role_devops +>: RequiresSkill(importance=6) :+> skill_sql;
+        }
+        
+        # Product Manager requires these skills
+        if role_productmgr {
+            role_productmgr +>: RequiresSkill(importance=8) :+> skill_agile;
+            role_productmgr +>: RequiresSkill(importance=5) :+> skill_sql;
+        }
+        
+        # UX Designer requires these skills
+        if role_ux {
+            role_ux +>: RequiresSkill(importance=10) :+> skill_figma;
+            role_ux +>: RequiresSkill(importance=4) :+> skill_js;
+        }
+        
+        # OSP Graph: Create Skill->Skill prerequisites with PrerequisiteOf edges
+        # Python is prerequisite for more advanced skills
+        skill_python +>: PrerequisiteOf(difficulty_gap=2) :+> skill_pandas;
+        skill_python +>: PrerequisiteOf(difficulty_gap=3) :+> skill_ml;
+        skill_js +>: PrerequisiteOf(difficulty_gap=2) :+> skill_react;
+        skill_sql +>: PrerequisiteOf(difficulty_gap=3) :+> skill_ml;
 
         # Create Job Postings
         here ++> JobPosting(
@@ -448,6 +611,18 @@ walker generate_roadmap {
         print("Generating roadmap for role: " + self.target_role);
         print("User skills: " + str(user_skills));
 
+        # OSP Graph Analysis: Calculate role match using graph traversal
+        let graph_match = None;
+        try {
+            let matcher = calculate_role_match(target_role=self.target_role) spawn root;
+            if matcher and len(matcher.reports) > 0 {
+                graph_match = matcher.reports[0];
+                print("OSP Graph Match Score: " + str(graph_match.get("match_score", 0)) + "%");
+            }
+        } except Exception as e {
+            print("Graph match calculation skipped: " + str(e));
+        }
+
         # Call AI Agents
         let strategy = analyze_career_strategy(
             user_skills,
@@ -499,12 +674,20 @@ walker generate_roadmap {
         here.target_role = self.target_role;
 
         print("Reporting results...");
-        report {
+        
+        # Include OSP graph match data in response
+        let response = {
             "target_role": self.target_role,
             "strategy": strategy,
             "market": market,
             "plan": plan
-        } ;
+        };
+        
+        if graph_match {
+            response["graph_match"] = graph_match;
+        }
+        
+        report response;
     }
 }
 
@@ -516,7 +699,7 @@ walker fetch_jobs {
 
         try {
             # Fetch from Remotive API (Software Development category)
-            
+            # Increased limit to 50 to get more variety
             let url = "https://remotive.com/api/remote-jobs?category=software-dev&limit=50";
 
             let request = Request(url);

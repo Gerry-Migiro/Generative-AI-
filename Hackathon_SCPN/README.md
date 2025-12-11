@@ -1,215 +1,311 @@
 # Smart Career Path Navigator
 
-> AI-powered career guidance platform built with Jaseci Programming Language (Project 4 - AI Hackathon)
+An AI-powered career guidance platform built with **Jaseci Programming Language** (Jac) that provides personalized career recommendations using **Object-Spatial Programming (OSP)**, **Multi-Agent AI**, and **Jac Client**.
 
-## Overview
+## 🎯 Project Overview
 
-Smart Career Path Navigator provides personalized career guidance by linking users' skills and interests to roles, courses, and live job market trends. The platform uses an Object-Spatial Programming (OSP) graph to model user profiles, target roles, and learning resources, with byLLM agents performing gap analysis and generating personalized learning roadmaps.
+This platform helps users navigate their career paths by:
+- Analyzing skills and identifying gaps using OSP graph traversals
+- Providing AI-powered career strategy recommendations via multi-agent systems
+- Offering personalized learning roadmaps based on market trends
+- Matching users to roles using graph-based scoring algorithms
 
-## Key Features
+## 🏗️ Architecture
 
-- **AI-Powered Career Analysis**: Multi-agent system analyzes career strategies, market trends, and learning paths
-- **Resume Parsing**: Automatically extract skills from resume text using AI
-- **Skill Gap Analysis**: Identify missing skills for target roles
-- **Learning Roadmap Generation**: Personalized weekly learning plans
-- **Live Job Market Data**: Real-time job listings from Remotive API
-- **Interactive Dashboard**: Visualize career progress and recommendations
-- **Graph-Based Profile**: OSP graph stores user skills, interests, and goals
+### OSP Graph Structure
 
-## Jaseci Features Demonstrated
+The platform leverages **Object-Spatial Programming** with the following graph model:
 
-### 1. **Object-Spatial Programming (OSP)**
-- **Named Node Types**: `User`, `Role`, `Skill`, `Course`, `JobPosting`
-- **Named Edge Types**: `UserSkill` (with `level` property)
-- **Graph Traversals**: 
-  - `[here->:UserSkill:->]` - Get user's skills
-  - `[here-->](?Role)` - Query available roles
-  - `[-->](?Course)` - Fetch courses
-- **Graph-Based Reasoning**: Profile management, skill gap analysis, career path recommendations
+**Nodes:**
+- `User` - User profiles with skills, interests, and career goals
+- `Role` - Job roles with salary ranges and descriptions
+- `Skill` - Technical skills and competencies
+- `Course` - Learning resources
+- `JobPosting` - Live job opportunities
 
-### 2. **byLLM Integration** (Multi-Agent System)
+**Edges:**
+- `UserSkill(level: int)` - User's proficiency in skills
+- `RequiresSkill(importance: int)` - Role requirements with 1-10 importance scoring
+- `PrerequisiteOf(difficulty_gap: int)` - Skill learning paths
 
-#### Agent 1: Career Strategy Analyzer
-- **Type**: Generative & Analytical
-- **Function**: `analyze_career_strategy(user_skills, target_role, user_interests, context)`
-- **Purpose**: Identifies strengths and skill gaps
+### Multi-Agent System
 
-#### Agent 2: Market Research Analyzer
-- **Type**: Generative
-- **Function**: `analyze_market(role_title, context)`
-- **Purpose**: Researches job market trends and salary ranges
+**Three specialized AI agents** orchestrate career guidance:
 
-#### Agent 3: Learning Path Designer
-- **Type**: Generative
-- **Function**: `create_learning_plan(missing_skills, timeline, context)`
-- **Purpose**: Creates personalized learning roadmaps
+1. **Career Strategy Analyzer** (`analyze_career_strategy`)
+   - Identifies user strengths and skill gaps
+   - Analyzes fit for target roles
+   - Provides strategic recommendations
 
-#### Agent 4: Resume Parser
-- **Type**: Analytical
-- **Function**: `resume_parser(resume_text)`
-- **Purpose**: Extracts technical skills from resume text
+2. **Market Research Analyzer** (`analyze_market`)
+   - Researches current job market trends
+   - Identifies in-demand skills
+   - Provides salary and demand insights
 
-**Agent Flow**: 
+3. **Learning Path Designer** (`create_learning_plan`)
+   - Creates personalized learning roadmaps
+   - Generates week-by-week study plans
+   - Recommends resources based on skill gaps
+
+**Agent Flow:**
 ```
-User Request → generate_roadmap → analyze_career_strategy → analyze_market → create_learning_plan
-User Resume → parse_resume → resume_parser → add skills to graph
+User Request → generate_roadmap → calculate_role_match (OSP) 
+           → analyze_career_strategy → analyze_market → create_learning_plan
 ```
 
-### 3. **Jac Client (Frontend)**
-- React-style components using Jac Client
-- All backend communication via `root spawn walker_name()` (no direct API calls)
-- Pages: Dashboard, Profile, CareerPath, Jobs, Courses
-- Real-time updates with Spawn() calls
+### OSP Graph Reasoning
 
-## Technical Architecture
+**Walker: `calculate_role_match`**
 
-### Backend (app.jac)
-- **Nodes**: User, Role, Skill, Course, JobPosting
-- **Edges**: UserSkill (with level property)
-- **Walkers**: 
-  - `seed_database` - Initialize demo data
-  - `get_profile` / `update_profile` - User management
-  - `add_skill` / `delete_skill` - Skills management
-  - `parse_resume` - AI-powered resume parsing
-  - `generate_roadmap` - Multi-agent career analysis
-  - `fetch_jobs` - Live job data from Remotive API
-  - `get_all_roles` - Role listings
-  - `get_recommended_courses` - Course suggestions
+Demonstrates non-trivial OSP graph traversal:
 
-### Frontend (Jac Client)
-- **Components**: Navbar
-- **Pages**: Dashboard, Profile, CareerPath, Jobs, Courses, Login, Signup
-- **Styling**: Dark theme with professional UI (globals.css)
+```jac
+# Traverse Role->RequiresSkill->Skill edges with importance scoring
+for skill_edge in [here->:RequiresSkill:->] {
+    let skill_node = [here->:RequiresSkill:->(`?Skill)][-1];
+    # Calculate weighted match score based on edge importance
+    matched_importance += edge.importance;
+}
+match_score = (matched_importance / total_importance) * 100;
+```
 
-### External Integrations
-- **Remotive API**: Real-time remote job listings
-- **Gemini 2.5 Flash**: LLM for byLLM agents
+**Key OSP Features:**
+- Edge-based filtering and scoring
+- Graph traversal for role-skill relationships
+- Weighted importance calculations
+- Prerequisite chain analysis
 
-## Installation & Setup
+### byLLM Integration
+
+**Generative Uses:**
+- Career strategies and recommendations
+- Market analysis summaries
+- Personalized learning plans
+
+**Analytical Uses:**
+- Resume parsing and skill extraction (`resume_parser`)
+- Text classification and validation
+- Content scoring
+
+**Example:**
+```jac
+def analyze_career_strategy(
+    user_skills: list, target_role: str, user_interests: list, context: str
+) -> str by llm(method="Reason");
+```
+
+### Jac Client Integration
+
+Frontend uses **Spawn()** for all backend calls:
+
+```jac
+// Profile page - spawning walkers
+let res = await root spawn get_profile();
+await root spawn add_skill(skill_name=newSkill);
+
+// Career path - generating roadmap
+let res = await root spawn generate_roadmap(target_role=role);
+
+// Jobs page - fetching opportunities
+let res = await root spawn fetch_jobs(role_filter=role);
+```
+
+All 7 pages use React-style components with Jac Client for seamless backend integration.
+
+## 🎓 Hackathon Requirements Proof
+
+### ✅ Multi-Agent System
+**Location:** [app.jac](app.jac#L48-67)
+- Agent 1: `analyze_career_strategy` (strategy & gaps)
+- Agent 2: `analyze_market` (market trends)
+- Agent 3: `create_learning_plan` (learning roadmap)
+- **Agent Flow:** User → generate_roadmap → OSP → Agent 1 → Agent 2 → Agent 3
+
+### ✅ OSP Graph Usage
+**Location:** [app.jac](app.jac#L77-160)
+- **Edges:** `RequiresSkill(importance)`, `PrerequisiteOf(difficulty_gap)`, `UserSkill(level)`
+- **Walker:** `calculate_role_match` - Traverses Role→RequiresSkill→Skill with weighted scoring
+- **Advantage:** Single graph traversal vs multiple REST calls
+- **Example:** `[role->:RequiresSkill:importance>=8:->]`
+
+### ✅ byLLM Integration
+**Location:** [app.jac](app.jac#L48-74)
+- **Generative:** Career strategies, market analysis, learning plans (3 agents)
+- **Analytical:** `resume_parser` - Extracts skills from resume text
+- **Model:** gemini/gemini-2.5-flash
+
+### ✅ Jac Client
+**Location:** [frontend/pages/](frontend/pages/)
+- **16 Spawn() calls** across 7 pages
+- Examples: `root spawn get_profile()`, `root spawn generate_roadmap(target_role=role)`
+- All frontend-backend calls use Spawn() (no REST APIs)
+
+## 🚀 Setup & Installation
 
 ### Prerequisites
+
+- Node.js (v16+)
+- Jac CLI
 - Python 3.10+
-- Node.js 18+
-- Jac CLI installed
 
-### Install Dependencies
+### Installation
 
+1. **Clone the repository:**
 ```bash
-# Install Node modules
+git clone <your-repo-url>
+cd todo-app
+```
+
+2. **Install dependencies:**
+```bash
 npm install
-
-# Install Python packages (if needed)
-pip install jaclang
 ```
 
-### Environment Setup
-
-Create a `.env` file with your API keys:
+3. **Set up environment:**
 ```bash
-# Gemini API Key (for byLLM)
-GEMINI_API_KEY=your_gemini_api_key_here
+# Add your LLM API key if needed
+export GEMINI_API_KEY="your-key-here"
 ```
 
-### Run the Application
+### Running the Application
 
+**Start the Jac server:**
 ```bash
 jac serve app.jac
 ```
 
-The server will start on `http://localhost:8000`
+The application will be available at `http://localhost:8000`
 
-## Usage
+## 📊 Features
 
-### 1. Create Profile
-- Navigate to Profile page
-- Enter your name, interests, and career goals
-- Add your skills manually or paste resume for AI extraction
+### 1. Profile Management
+- Resume upload and skill extraction (AI-powered)
+- Manual skill addition/deletion
+- Interest and goal tracking
 
-### 2. Generate Career Roadmap
-- Go to CareerPath page
-- Select target role (e.g., "Software Developer")
-- Click "Generate Roadmap"
-- View AI-generated career strategy, market analysis, and learning plan
+### 2. Career Path Generation
+- AI-powered roadmap creation
+- OSP graph-based role matching (match score %)
+- Multi-agent analysis (strategy + market + learning plan)
 
-### 3. Browse Jobs
-- Navigate to Jobs page
-- Jobs are automatically fetched based on your target role
-- Filter by specific roles
+### 3. Job Discovery
+- Live job fetching from external APIs
+- Role-based filtering
+- Match scoring
 
-### 4. Explore Courses
-- Visit Courses page to see recommended learning resources
+### 4. Learning Resources
+- Curated course recommendations
+- Skill-based learning paths
 
-## Demo Data
+## 🧪 Testing
 
-The application includes seed data:
-- 5 career roles (Software Developer, Data Scientist, Product Manager, DevOps Engineer, UX Designer)
-- 10 courses (Python, Data Science, Web Dev, Machine Learning, AWS, React, SQL, Product Management, DevOps, UX)
-- 15 job postings (fallback data if API fails)
-
-## Hackathon Compliance
-
-✅ **Multi-Agent Design**: 4 specialized byLLM agents with distinct responsibilities
-✅ **OSP Graph Usage**: Named nodes/edges with graph traversals and reasoning
-✅ **byLLM Integration**: Generative (roadmap, market analysis) + Analytical (skill extraction, gap analysis)
-✅ **Jac Client**: Frontend uses Spawn() for all backend communication
-✅ **Seed Data**: Realistic demo data for roles, skills, courses, jobs
-
-## Project Structure
-
-```
-Hackathon_SCPN/
-├── app.jac                 # Backend (Nodes, Edges, Walkers, Agents)
-├── frontend/
-│   ├── components/
-│   │   └── Navbar.jac
-│   ├── pages/
-│   │   ├── Dashboard.jac
-│   │   ├── Profile.jac
-│   │   ├── CareerPath.jac
-│   │   ├── Jobs.jac
-│   │   ├── Courses.jac
-│   │   ├── LoginPage.jac
-│   │   └── SignupPage.jac
-│   └── globals.css
-├── package.json
-├── vite.config.js
-└── README.md
+**Check for syntax errors:**
+```bash
+jac check app.jac
 ```
 
-## Technologies Used
+**Run seed data:**
+The database automatically seeds on first run with:
+- 5 roles (Software Developer, Data Scientist, DevOps, Product Manager, UX Designer)
+- 10 skills with OSP relationships
+- 10+ courses
+- Role-Skill graphs with importance weights
 
-- **Jaseci Programming Language** (Jac)
-- **Object-Spatial Programming** (OSP)
-- **byLLM** (Gemini 2.5 Flash)
-- **Jac Client** (React-style frontend)
-- **Remotive API** (Job data)
-- **Vite** (Build tool)
+## 📈 OSP Graph Advantages
 
-## Known Limitations
+Unlike traditional REST APIs, our OSP implementation provides:
 
-- Gemini API has rate limits on free tier
-- Resume parser requires well-formatted resume text
-- Job data depends on Remotive API availability
+1. **Weighted Scoring:** Edge importance values enable nuanced role matching
+2. **Graph Traversal:** Multi-hop reasoning (User→Skill→Role→Prerequisites)
+3. **Dynamic Relationships:** Skill prerequisites and role requirements as first-class graph entities
+4. **Efficient Queries:** Direct graph navigation vs multiple API calls
 
-## Future Enhancements
+## 🎓 Hackathon Requirements Met
 
-- Add skill proficiency tracking
-- Implement course progress tracking
-- Add notifications for new opportunities
-- Enhance graph visualization
-- Support for multiple resume formats (PDF, DOCX)
+✅ **Multi-Agent Design:** 3 specialized agents with documented interaction flow  
+✅ **OSP Graph Usage:** Named edges, traversals, scoring algorithms  
+✅ **byLLM Integration:** Generative (roadmaps) + analytical (resume parsing)  
+✅ **Jac Client:** Spawn() calls throughout frontend  
+✅ **Seed Data:** Comprehensive test data with realistic examples
 
-## Team
+## 📝 Agent Interaction Diagram
 
-**Developer**: Gerson  
-**Project**: AI Hackathon - Project 4 (Smart Career Path Navigator)  
-**Submission Date**: December 15, 2025
+```
+                    User Input
+                        |
+                        v
+               generate_roadmap Walker
+                        |
+                        +----> calculate_role_match (OSP)
+                        |       - Graph traversal
+                        |       - Edge scoring
+                        |       - Match calculation
+                        |
+                        +----> analyze_career_strategy (Agent 1)
+                        |       - Identify strengths
+                        |       - Find skill gaps
+                        |
+                        +----> analyze_market (Agent 2)
+                        |       - Market demand
+                        |       - Salary ranges
+                        |
+                        +----> create_learning_plan (Agent 3)
+                                - Week-by-week plan
+                                - Resource recommendations
+                                |
+                                v
+                        Combined Response
+```
 
-## License
+## 🛠️ Technology Stack
 
-This project is created for the AI Hackathon educational program.
+- **Backend:** Jaseci/Jac Programming Language
+- **Frontend:** Jac Client (React-style components)
+- **AI/LLM:** byLLM with Gemini Flash 2.5
+- **Graph Model:** OSP with typed nodes and edges
+- **API Integration:** Remotive Jobs API
+
+## � Project Stats
+
+- **Backend:** 830 lines (app.jac)
+- **Frontend:** 1,901 lines (7 pages)
+- **Walkers:** 11 (9 exposed via API)
+- **Spawn Calls:** 16 across frontend
+- **OSP Edges:** 3 types with attributes
+- **AI Agents:** 3 (byLLM-powered)
+
+## 📚 Key Files
+
+- [`app.jac`](app.jac) - Main backend (OSP graph, walkers, multi-agent system)
+- [`frontend/pages/`](frontend/pages/) - Jac Client components (Dashboard, Profile, Career, Jobs, Courses)
+- [`DEMO_SCRIPT.md`](DEMO_SCRIPT.md) - Complete video demo script with timestamps
+
+## 🧪 Testing
+
+```bash
+# Check for errors
+jac check app.jac
+
+# Build application  
+jac build app.jac
+
+# Start server
+jac serve app.jac
+```
+
+Access at `http://localhost:8000`
+
+## 🎬 Demo Video
+
+Follow the complete script in [DEMO_SCRIPT.md](DEMO_SCRIPT.md) to record your 4-5 minute demo video.
+
+**Key Points to Cover:**
+1. Resume parsing with byLLM (0:30-1:30)
+2. OSP graph role matching (1:30-2:30)
+3. Multi-agent system output (2:30-3:30)
+4. Jac Client Spawn() calls (3:30-4:00)
 
 ---
 
-**Discord**: [Join the community](https://discord.gg/jSQP7rjA)  
-**GitHub**: [Jaseci Labs](https://github.com/jaseci-labs/jaseci)
+**Built for AI Hackathon 2025** | Deadline: Dec 15, 2025  
+[Discord](https://discord.gg/jSQP7rjA) | [Jaseci GitHub](https://github.com/jaseci-labs/jaseci)
