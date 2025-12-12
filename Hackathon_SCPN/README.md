@@ -263,7 +263,7 @@ Unlike traditional REST APIs, our OSP implementation provides:
 - **Frontend:** Jac Client (React-style components)
 - **AI/LLM:** byLLM with Gemini Flash 2.5
 - **Graph Model:** OSP with typed nodes and edges
-- **API Integration:** Remotive Jobs API
+- **API Integration:** Jobicy Jobs API
 
 ## � Project Stats
 
