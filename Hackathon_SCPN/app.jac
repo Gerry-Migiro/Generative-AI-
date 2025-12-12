@@ -377,7 +377,6 @@ walker seed_database {
         print("Database seeded successfully");
     }
 }
-
 walker get_all_roles {
     can return_roles with `root entry {
         let roles = [here-->](`?Role);
@@ -400,7 +399,6 @@ walker get_all_roles {
         report role_list ;
     }
 }
-
 walker get_recommended_courses {
     can recommend with `root entry {
         # Get all courses and return them
@@ -460,7 +458,6 @@ walker parse_resume {
         } ;
     }
 }
-
 walker get_profile {
     can get_profile with `root entry {
         visit [-->](`?User) else {
@@ -487,7 +484,6 @@ walker get_profile {
         } ;
     }
 }
-
 walker update_profile {
     has name: any = None;
     has interests: any = None;
@@ -548,7 +544,6 @@ walker add_skill {
         report {"status": "success", "message": "Added skill " + str(self.skill_name)} ;
     }
 }
-
 walker delete_skill {
     has skill_name: str;
 
@@ -576,7 +571,6 @@ walker delete_skill {
         report {"status": status, "message": message} ;
     }
 }
-
 walker generate_roadmap {
     has target_role: str;
 
@@ -686,7 +680,6 @@ walker generate_roadmap {
         report response ;
     }
 }
-
 walker fetch_jobs {
     has role_filter: str = "";
 
@@ -694,39 +687,38 @@ walker fetch_jobs {
         let jobs_list = [];
 
         try {
-         
-            # Fetch from Remotive API (Software Development category)
-            let url = "https://remotive.com/api/remote-jobs?category=software-dev&limit=50";
+            let url = "https://jobicy.com/api/v2/remote-jobs";
 
             let request = Request(url);
             request.add_header("User-Agent", "Mozilla/5.0 (Career-Advisory-App)");
             let response = urlopen(request);
             let data = response.read().decode("utf-8");
-            let json_data = loads(data);
+            let json_data = loads(data);  # parse JSON
 
-            if "jobs" in json_data {
+            # Check that "jobs" key exists and is a list
+            if "jobs" in json_data and type(json_data["jobs"]) == list and len(json_data["jobs"]) > 0 {
                 for job in json_data["jobs"] {
-                    if len(jobs_list) >= 50 {
-                        break;
-                    }
+                    if len(jobs_list) >= 50 { break; }
 
-                    let job_title = job["title"];
+                    # Safe access to fields
+                    let job_title = job["jobTitle"] if "jobTitle" in job else "No Title";
+                    let company = job["companyName"] if "companyName" in job else "Unknown";
+                    let location = job["jobGeo"] if "jobGeo" in job else "Remote";
+                    let posted_date = job["pubDate"][:10] if "pubDate" in job else "N/A";
 
-                    # Simple filter if user specified a role
+                    # Role filter
                     if self.role_filter != "" {
                         let filter_lower = self.role_filter.lower();
                         let title_lower = job_title.lower();
-                        if filter_lower not in title_lower {
-                            continue;
-                        }
+                        if filter_lower not in title_lower { continue; }
                     }
 
                     jobs_list.append(
                         {
                             "title": job_title,
-                            "company": job["company_name"],
-                            "location": job["candidate_required_location"],
-                            "posted_date": job["publication_date"][:10],
+                            "company": company,
+                            "location": location,
+                            "posted_date": posted_date,
                             "match_score": 85
                         }
                     );
@@ -736,14 +728,12 @@ walker fetch_jobs {
             print(f"Error fetching jobs: {e}");
         }
 
-       
-        # Fallback to seeded jobs if API fails OR returns no results
+        # Fallback to seeded jobs
         if len(jobs_list) == 0 {
             print("No jobs from API, using seeded data");
             let all_jobs = [root-->](`?JobPosting);
             for job in all_jobs {
-                if self.role_filter == ""
-                or self.role_filter.lower() in job.title.lower() {
+                if self.role_filter == "" or self.role_filter.lower() in job.title.lower() {
                     jobs_list.append(
                         {
                             "title": job.title,
@@ -757,9 +747,9 @@ walker fetch_jobs {
             }
         }
 
-        # Return jobs or empty list
+        # Return jobs
         if len(jobs_list) > 0 {
-            report jobs_list ;
+            report jobs_list;
         } else {
             report [
                 {
@@ -768,7 +758,7 @@ walker fetch_jobs {
                     "posted_date": "N/A",
                     "match_score": 0
                 }
-            ] ;
+            ];
         }
     }
 }
