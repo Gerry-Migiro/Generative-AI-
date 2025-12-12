@@ -307,29 +307,22 @@ walker seed_database {
         }
 
         # Product Manager requires these skills
-        # Product Manager requires these skills
         if role_productmgr {
             role_productmgr +>: RequiresSkill(importance=8) :+> skill_agile;
             role_productmgr +>: RequiresSkill(importance=5) :+> skill_sql;
         }
-
-        # UX Designer requires these skills
         # UX Designer requires these skills
         if role_ux {
             role_ux +>: RequiresSkill(importance=10) :+> skill_figma;
             role_ux +>: RequiresSkill(importance=4) :+> skill_js;
         }
-
         # OSP Graph: Create Skill->Skill prerequisites with PrerequisiteOf edges
-        # OSP Graph: Create Skill->Skill prerequisites with PrerequisiteOf edges
-        # Python is prerequisite for more advanced skills
         # Python is prerequisite for more advanced skills
         skill_python +>: PrerequisiteOf(difficulty_gap=2) :+> skill_pandas;
         skill_python +>: PrerequisiteOf(difficulty_gap=3) :+> skill_ml;
         skill_js +>: PrerequisiteOf(difficulty_gap=2) :+> skill_react;
         skill_sql +>: PrerequisiteOf(difficulty_gap=3) :+> skill_ml;
 
-        # Create Job Postings
         # Create Job Postings
         here ++> JobPosting(
             title="Software Developer",
@@ -390,7 +383,6 @@ walker get_all_roles {
         let roles = [here-->](`?Role);
         if len(roles) == 0 {
             # Auto-seed if no roles exist
-            # Auto-seed if no roles exist
             here spawn seed_database();
             roles = [here-->](`?Role);
         }
@@ -412,7 +404,6 @@ walker get_all_roles {
 walker get_recommended_courses {
     can recommend with `root entry {
         # Get all courses and return them
-        # Get all courses and return them
         let all_courses = [-->](`?Course);
         let course_list = [];
         for course in all_courses {
@@ -425,13 +416,11 @@ walker get_recommended_courses {
 }
 
 # Resume Parsing Walker: Extracts skills, experience, education from resume text
-# Resume Parsing Walker: Extracts skills, experience, education from resume text
 walker parse_resume {
     has resume_text: str;
 
     can extract_info with `root entry {
         visit [-->](`?User) else {
-            # Auto-create user if doesn't exist
             # Auto-create user if doesn't exist
             here ++> User(name="", interests=[], goals=[], target_role="");
             visit [-->](`?User);
@@ -440,10 +429,8 @@ walker parse_resume {
 
     can parse_and_update with User entry {
         # Use AI agent to extract skills from resume text
-        # Use AI agent to extract skills from resume text
         let skill_list = resume_parser(resume_text=self.resume_text);
 
-        # Get current skills to avoid duplicates
         # Get current skills to avoid duplicates
         let current_skills = [];
         for s in [here->:UserSkill:->] {
@@ -451,13 +438,11 @@ walker parse_resume {
         }
 
         # Add new skills from resume
-        # Add new skills from resume
         let added_skills = [];
         let skipped_skills = [];
 
         for skill_name in skill_list {
             if skill_name not in current_skills {
-                # Create new skill and connect (simple approach)
                 # Create new skill and connect (simple approach)
                 here +>: UserSkill(level=50) :+> Skill(name=skill_name);
                 added_skills.append(skill_name);
@@ -466,7 +451,6 @@ walker parse_resume {
             }
         }
 
-        # Return structured resume data with update info
         # Return structured resume data with update info
         report {
             "skills": skill_list,
@@ -480,7 +464,6 @@ walker parse_resume {
 walker get_profile {
     can get_profile with `root entry {
         visit [-->](`?User) else {
-            # Auto-create user if doesn't exist
             # Auto-create user if doesn't exist
             here ++> User(name="", interests=[], goals=[], target_role="");
             visit [-->](`?User);
@@ -513,7 +496,6 @@ walker update_profile {
 
     can start with `root entry {
         visit [-->](`?User) else {
-            # Auto-create user if doesn't exist
             # Auto-create user if doesn't exist
             here ++> User(
                 name=self.name if self.name != None else "",
@@ -553,7 +535,6 @@ walker add_skill {
 
     can add with User entry {
         # Check if skill already exists
-        # Check if skill already exists
         let exists: bool = False;
         for s in [here->:UserSkill:->] {
             if s.name == self.skill_name {
@@ -579,7 +560,6 @@ walker delete_skill {
 
     can delete with User entry {
         let deleted: bool = False;
-        # Delete all matching skill nodes connected to the user
         # Delete all matching skill nodes connected to the user
         for skill_node in [here->:UserSkill:->] {
             if skill_node.name == self.skill_name {
@@ -623,7 +603,7 @@ walker generate_roadmap {
         print("Generating roadmap for role: " + self.target_role);
         print("User skills: " + str(user_skills));
 
-        # OSP Graph Analysis: Calculate role match using graph traversal
+        
         # OSP Graph Analysis: Calculate role match using graph traversal
         let graph_match = None;
         try {
@@ -639,7 +619,6 @@ walker generate_roadmap {
         }
 
         # Call AI Agents
-        # Call AI Agents
         let strategy = analyze_career_strategy(
             user_skills,
             self.target_role,
@@ -654,11 +633,10 @@ walker generate_roadmap {
         );
         print("Market analysis generated: " + str(bool(market)));
 
-        # Extract gaps from strategy to create targeted learning plan
+       
         # Extract gaps from strategy to create targeted learning plan
         let gaps_list = [];
         try {
-            # Clean up potential markdown code blocks from strategy response
             # Clean up potential markdown code blocks from strategy response
             let clean_strategy = strategy.replace("```json", "").replace("```", "").strip();
             let strategy_obj = loads(clean_strategy);
@@ -670,7 +648,6 @@ walker generate_roadmap {
             print("Strategy content: " + strategy);
         }
 
-        # If no gaps found or extraction failed, use user skills as fallback
         # If no gaps found or extraction failed, use user skills as fallback
         if not gaps_list or len(gaps_list) == 0 {
             print("No gaps found, using skills for learning plan");
@@ -687,7 +664,6 @@ walker generate_roadmap {
         print("Learning plan generated: " + str(bool(plan)));
 
         # Save to user node for persistence
-        # Save to user node for persistence
         here.last_strategy = strategy;
         here.last_market = market;
         here.last_roadmap_plan = plan;
@@ -695,7 +671,6 @@ walker generate_roadmap {
 
         print("Reporting results...");
 
-        # Include OSP graph match data in response
         # Include OSP graph match data in response
         let response = {
             "target_role": self.target_role,
@@ -719,10 +694,8 @@ walker fetch_jobs {
         let jobs_list = [];
 
         try {
+         
             # Fetch from Remotive API (Software Development category)
-            # Fetch from Remotive API (Software Development category)
-            # Increased limit to 50 to get more variety
-            # Increased limit to 50 to get more variety
             let url = "https://remotive.com/api/remote-jobs?category=software-dev&limit=50";
 
             let request = Request(url);
@@ -739,7 +712,6 @@ walker fetch_jobs {
 
                     let job_title = job["title"];
 
-                    # Simple filter if user specified a role
                     # Simple filter if user specified a role
                     if self.role_filter != "" {
                         let filter_lower = self.role_filter.lower();
@@ -764,7 +736,7 @@ walker fetch_jobs {
             print(f"Error fetching jobs: {e}");
         }
 
-        # Fallback to seeded jobs if API fails OR returns no results
+       
         # Fallback to seeded jobs if API fails OR returns no results
         if len(jobs_list) == 0 {
             print("No jobs from API, using seeded data");
@@ -786,7 +758,6 @@ walker fetch_jobs {
         }
 
         # Return jobs or empty list
-        # Return jobs or empty list
         if len(jobs_list) > 0 {
             report jobs_list ;
         } else {
@@ -803,7 +774,6 @@ walker fetch_jobs {
 }
 
 # --- Frontend ---
-# --- Frontend ---
 cl import from "@jac-client/utils" { Router, Routes, Route }
 
 cl import from .frontend.components.Navbar { Navbar }
@@ -815,7 +785,6 @@ cl import from .frontend.pages.Jobs { Jobs }
 cl import from .frontend.pages.Profile { Profile }
 cl import from .frontend.pages.Courses { Courses }
 
-# Import Global Styles
 # Import Global Styles
 cl import "../frontend/globals.css";
 
