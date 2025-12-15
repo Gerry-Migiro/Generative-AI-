@@ -401,14 +401,65 @@ walker get_all_roles {
 }
 walker get_recommended_courses {
     can recommend with `root entry {
-        # Get all courses and return them
+        let missing_skills = [];
+        let users = [here-->](`?User);
+
+        # Try to find user and their missing skills for target role
+        if len(users) > 0 {
+            let u = users[0];
+            if u.target_role {
+                try {
+                    # Reuse existing walker logic to find gaps
+                    let matcher = calculate_role_match(target_role=u.target_role) spawn root;
+                    if matcher and len(matcher.reports) > 0 {
+                        let report_data = matcher.reports[0];
+                        if "missing_skills" in report_data {
+                            missing_skills = report_data["missing_skills"];
+                        }
+                    }
+                } except Exception as e {
+                    print("Error calculating skills for courses: " + str(e));
+                }
+            }
+        }
+
+        # Get all courses
         let all_courses = [-->](`?Course);
         let course_list = [];
+        
         for course in all_courses {
-            course_list.append(
-                {"title": course.title, "url": course.url, "duration": course.duration}
-            );
+            let is_relevant = False;
+            
+            # If we have missing skills, filter for them
+            if len(missing_skills) > 0 {
+                for skill in missing_skills {
+                    # Simple keyword match: if skill name is in course title
+                    if skill.lower() in course.title.lower() {
+                        is_relevant = True;
+                        break;
+                    }
+                }
+            } else {
+                # If no specific gaps identified, show everything (or fallback logic)
+                is_relevant = True;
+            }
+
+            if is_relevant {
+                course_list.append(
+                    {"title": course.title, "url": course.url, "duration": course.duration}
+                );
+            }
         }
+        
+        # Fallback: if filtering resulted in 0 courses, return all
+        if len(course_list) == 0 {
+             for course in all_courses {
+                course_list.append(
+                    {"title": course.title, "url": course.url, "duration": course.duration}
+                );
+            }
+        }
+
         report course_list ;
     }
 }
