@@ -2,13 +2,15 @@
 node_modules/
 
 # Build outputs
-build/
-dist/
-src/
+build/*
+!build/.gitkeep
+dist/*
+!dist/.gitkeep
+src/*
+!src/.gitkeep
 
 # Session files
 *.session
 *.session.users.json
 
-# Session files
 .env
