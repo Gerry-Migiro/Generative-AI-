@@ -1,5 +1,10 @@
 # Smart Career Path Navigator
 
+
+## 🎬 Demo Video
+
+[Watch the demo on YouTube](https://youtu.be/Ls6ysz0rUSU)
+
 An AI-powered career guidance platform built with **Jaseci Programming Language** (Jac) that provides personalized career recommendations using **Object-Spatial Programming (OSP)**, **Multi-Agent AI**, and **Jac Client**.
 
 ## 🎯 Project Overview

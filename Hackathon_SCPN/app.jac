@@ -825,7 +825,6 @@ cl import from .frontend.pages.CareerPath { CareerPath }
 cl import from .frontend.pages.Jobs { Jobs }
 cl import from .frontend.pages.Profile { Profile }
 cl import from .frontend.pages.Courses { Courses }
-
 # Import Global Styles
 cl import "../frontend/globals.css";
 
